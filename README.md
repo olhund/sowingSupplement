@@ -10,6 +10,6 @@ This global specialization for Farming Simulator 15 is a collection of enhanceme
 * Halfside shutoff
 * Under root fertilization (urfSeeder)
 * Hectare counter
-
+* Seeder Sounds
 
 [Visit www.planet-ls.de](http://planet-ls.de/board/index.php?page=Thread&threadID=15402)
