@@ -8,7 +8,7 @@ This global specialization for Farming Simulator 15 is a collection of enhanceme
 * Driving Lines
 * Separate keys for ridge markers
 * Halfside shutoff
-* Under root fertilization (urfSeeder)
+* Under root fertilization (urfSeeder) (ScriptDocu required)
 * Hectare counter
 * Seeder Sounds
 
