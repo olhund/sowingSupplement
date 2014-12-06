@@ -81,15 +81,9 @@ function SowingSounds:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
 	
 	if self.activeModules ~= nil and self.activeModules.sowingSounds and not resetVehicles then 
 		self.activeModules.sowingSounds = Utils.getNoNil(getXMLBool(xmlFile, key .. "#sowingSoundIsActiv"), self.activeModules.sowingSounds);
+		self:updateSoSoGUI();
 		-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes_sowingSoundIsActiv = "..tostring(self.activeModules.sowingSounds))
-		if self.activeModules.sowingSounds then
-			-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes -> self:updateSoSoGUI()")
-			self:updateSoSoGUI();
-		else
-			self.activeModules.num = self.activeModules.num - 1;
-			self:updateSoSoGUI();
-			-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes -> self.activeModules.num = "..tostring(self.activeModules.num))
-		end;	
+		-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes -> self:updateSoSoGUI()")
 	end;
     return BaseMission.VEHICLE_LOAD_OK;
 end

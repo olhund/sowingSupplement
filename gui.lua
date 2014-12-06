@@ -245,9 +245,9 @@ function SowingSupp.guiElement:render(grid)
         -- renderText((grid.table[self.gridPos].x + 0.004), (grid.table[self.gridPos].y + 0.006), self.textSize, tostring(self.value));
       -- end;
 	
-	-- elseif self.style == "infoTEST" then
-      -- setTextAlignment(RenderText.ALIGN_LEFT);
-      -- renderText((grid.table[self.gridPos].x), (grid.table[self.gridPos].y), self.textSize, tostring(self.value));
+	elseif self.style == "infoTEST" then
+      setTextAlignment(RenderText.ALIGN_LEFT);
+      renderText((grid.table[self.gridPos].x), (grid.table[self.gridPos].y), self.textSize, tostring(self.value));
 	  
 	elseif self.style == "infoSoCoSession" then
       setTextAlignment(RenderText.ALIGN_LEFT);

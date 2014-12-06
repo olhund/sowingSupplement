@@ -5,7 +5,7 @@
 -- source: 		threshing counter v2.3 by Manuel Leithner (edit by gotchTOM)
 -- @author:  	Manuel Leithner/gotchTOM
 -- @date:			6-Dec-2014
--- @version:	v1.01
+-- @version:	v1.02
 -- @history:	v1.0 - initial implementation
 --						v1.01 - part of SowingSupplement
 --
@@ -23,7 +23,6 @@ end;
 function SowingCounter:load(xmlFile)
 	
 	if self.activeModules ~= nil and self.activeModules.sowingCounter then
-	-- print("!!!!!!!!!!!!!!!!SowingCounter:load")
 		self.resetSessionHectars = SpecializationUtil.callSpecializationsFunction("resetSessionHectars");
 		self.updateSoCoGUI = SpecializationUtil.callSpecializationsFunction("updateSoCoGUI");
 		self.sowingCounter = {};
@@ -66,25 +65,18 @@ end;
 function SowingCounter:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
 	if self.activeModules ~= nil and self.activeModules.sowingCounter and not resetVehicles then 
 		self.activeModules.sowingCounter = Utils.getNoNil(getXMLBool(xmlFile, key .. "#sowingCounterIsActiv"), self.activeModules.sowingCounter);
+		self.sowingCounter.totalHectars =  Utils.getNoNil(getXMLFloat(xmlFile, key .. "#totalHectars"), 0);
+		self:updateSoCoGUI();
 		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_sowingCounterIsActiv = "..tostring(self.activeModules.sowingCounter))
-		if self.activeModules.sowingCounter then
-			self.sowingCounter.totalHectars =  Utils.getNoNil(getXMLFloat(xmlFile, key .. "#totalHectars"), 0);
-			-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_totalHectars = "..tostring(self.sowingCounter.totalHectars))
-			-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self:updateSoCoGUI()")
-			self:updateSoCoGUI();
-		else
-			self.activeModules.num = self.activeModules.num - 1;
-			-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self.activeModules.num = "..tostring(self.activeModules.num))
-		end;	
+		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_totalHectars = "..tostring(self.sowingCounter.totalHectars))
+		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self:updateSoCoGUI()")
 	end;
     return BaseMission.VEHICLE_LOAD_OK;
 end;
 
 function SowingCounter:getSaveAttributesAndNodes(nodeIdent)
 	local attributes = 'sowingCounterIsActiv="' .. tostring(self.activeModules.sowingCounter) ..'"'; 
-	if self.activeModules.sowingCounter then
-		attributes = attributes.. ' totalHectars="' .. tostring(self.sowingCounter.totalHectars) ..'"';
-	end;
+	attributes = attributes.. ' totalHectars="' .. tostring(self.sowingCounter.totalHectars) ..'"';
 	-- print("!!!!!!!!!!!!!!SowingCounter:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
 	return attributes;
 end;
