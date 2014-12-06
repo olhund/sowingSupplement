@@ -249,9 +249,9 @@ function SowingSupp:updateGrids(xPos, yPos)
 		self.grid1.elements.scTotal = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoSoCoTotal", nil, "0.0ha", false, "SowingCounter_totalHUD.dds", g_currentMission.fillLevelTextSize);
 	end;
 	
-	self.grid1.elements.test1 = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
-	self.grid1.elements.test2 = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
-	self.grid1.elements.test3 = SowingSupp.guiElement:New( 7, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
+	-- self.grid1.elements.test1 = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
+	-- self.grid1.elements.test2 = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
+	-- self.grid1.elements.test3 = SowingSupp.guiElement:New( 7, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
 	
 	-- self.grid1.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "info", nil, "0.5 ha", true, "SowingCounter_sessionHUD.dds");
 	-- self.grid1.elements.scTotal = SowingSupp.guiElement:New( 2, nil, nil, nil, "info", nil, "25.0 ha", true, "SowingCounter_totalHUD.dds");
@@ -268,9 +268,9 @@ function SowingSupp:updateGrids(xPos, yPos)
 	self.grid2.elements.soSoModulIcon = SowingSupp.guiElement:New( 4, "toggleSoSoModul", nil, nil, "toggleModul", "", self.activeModules.sowingSounds, true, nil);
 	self.grid2.elements.soSoModulText = SowingSupp.guiElement:New( 5, nil, nil, nil, "infoModul", nil,  SowingMachine.SowingSounds, true, nil, g_currentMission.fillLevelTextSize);
 	
-	self.grid2.elements.test1 = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
-	self.grid2.elements.test2 = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
-	self.grid2.elements.test3 = SowingSupp.guiElement:New( 7, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
+	-- self.grid2.elements.test1 = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
+	-- self.grid2.elements.test2 = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
+	-- self.grid2.elements.test3 = SowingSupp.guiElement:New( 7, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
 	
 	-- self.grid2.elements.scInfo = SowingSupp.guiElement:New( 4, nil, nil, nil, "info", nil, "Weiterer Test-Text!", true, nil);
 	-- self.grid2.elements.dlMode = SowingSupp.guiElement:New( 19, "changeMode", -1, 1, "arrow", self.texts.dlMode, "AUTO", true, nil);
