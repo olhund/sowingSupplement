@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="21">
-   <author>webalizer</author>
+   <author>webalizer/gotchTOM</author>
     <title>
-		<en>HUD</en>
-        <de>HUD</de>
-		<fr>HUD</fr>
+		<en>Sowing Supplement</en>
+        <de>Sowing Supplement</de>
+		<fr>Sowing Supplement</fr>
     </title>
     <description>
-        <en>ooHUD</en>
-		<de>ooHUD</de>
-		<fr>ooHUD</fr>
+        <en>Sowing Supplement</en>
+		<de>Sowing Supplement</de>
+		<fr>Sowing Supplement</fr>
  	</description>
     <multiplayer supported="true"/>
 	<iconFilename>store.png</iconFilename>
-	<version>0.02</version>
+	<version>0.03</version>
 	<extraSourceFiles>
         <sourceFile filename="register.lua" />
     </extraSourceFiles>

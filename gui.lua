@@ -255,7 +255,7 @@ function SowingSupp.guiElement:render(grid)
 	  local iconWidth = iconHeight / g_screenAspectRatio;
 	  local offsetIcon = guiElementHeight * 0.05;
       renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
-	  local xOffsetText = guiElementHeight * .84;
+	  local xOffsetText =  iconWidth + 3 * offsetIcon;--guiElementHeight * .84;
 	  local yOffsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
       renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.value));
 	
@@ -265,7 +265,7 @@ function SowingSupp.guiElement:render(grid)
 	  local iconWidth = iconHeight / g_screenAspectRatio;
 	  local offsetIcon = guiElementHeight * 0.05;
       renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
-	  local xOffsetText = guiElementHeight * .84;
+	  local xOffsetText = iconWidth + 3 * offsetIcon;--guiElementHeight * .84;
 	  local yOffsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
       renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.value));
 	

@@ -4,7 +4,7 @@
 --
 --	@author:		gotchTOM & webalizer
 --	@date: 			6-Dec-2014
---	@version: 	v0.05
+--	@version: 	v0.06
 --
 -- included modules: sowingCounter, sowingSounds
 -- 
@@ -30,8 +30,12 @@ function SowingSupp:load(xmlFile)
 		-- self.activeModules.num = 0;
 		self.activeModules.sowingCounter = true;
 		self.activeModules.sowingSounds = true;
-		
-		SowingSupp:loadConfigFile(self);
+		if SowingSupp.isDedi == nil then
+			SowingSupp.isDedi = SowingSupp:checkIsDedi();
+		end;
+		if not SowingSupp.isDedi then 
+			SowingSupp:loadConfigFile(self);
+		end;	
 		
 		print("SowingSupp:load - check:")
 		for name,value in pairs(self.activeModules) do
@@ -51,6 +55,11 @@ function SowingSupp:load(xmlFile)
 	self:updateGrids(xPos, yPos);
 	
 
+end;
+
+function SowingSupp:checkIsDedi()
+	local pixelX, pixelY = getScreenModeInfo(getScreenMode());
+	return pixelX*pixelY < 1;
 end;
 
 function SowingSupp:delete()
@@ -158,7 +167,8 @@ function SowingSupp:updateTick(dt)
 			self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs = 0;
 		end;
 		if self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs ~= self.lastNumActiveHUDs and self.grid1.baseX == g_currentMission.hudSelectionBackgroundOverlay.x then
-			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height*(self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) + g_currentMission.hudBackgroundOverlay.height;
+			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height*(self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) + 
+	g_currentMission.hudSelectionBackgroundOverlay.height*.038 + g_currentMission.hudBackgroundOverlay.height;
 			
 			self:updateGrids(self.grid1.baseX, yPos);
 			
