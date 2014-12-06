@@ -13,7 +13,7 @@
  	</description>
     <multiplayer supported="true"/>
 	<iconFilename>store.png</iconFilename>
-	<version>1.0</version>
+	<version>0.01</version>
 	<extraSourceFiles>
         <sourceFile filename="register.lua" />
     </extraSourceFiles>
@@ -23,10 +23,12 @@
     </inputBindings>	
 	<l10n>
 		<!-- Buttons -->
-		<text name="SOWINGSUPP_HUD">             <de>SowingSupp HUD aktivieren</de>             <en>SowingSupp HUD activate</en>			         </text>
-		<text name="SOWINGSUPP_MOUSE">             <de>SowingSupp MOUSE aktivieren</de>             <en>SowingSupp MOUSE activate</en>			         </text>
+		<text name="SOWINGSUPP_HUD">            <de>SowingSupp HUD aktivieren</de>      <en>SowingSupp HUD activate</en>		</text>
+		<text name="SOWINGSUPP_MOUSE">          <de>SowingSupp MOUSE aktivieren</de>    <en>SowingSupp MOUSE activate</en>		</text>
 		<!-- Text -->
-		<text name="SOWINGSUPP_HUDon">             <de>HUD einschalten</de>             <en>activate HUD</en>			         </text>
-		<text name="SOWINGSUPP_HUDoff">             <de>HUD ausschalten</de>             <en>deactivate HUD</en>			         </text>
+		<text name="SOWINGSUPP_HUDon">          <de>HUD einschalten</de>             	<en>activate HUD</en>			        </text>
+		<text name="SOWINGSUPP_HUDoff">         <de>HUD ausschalten</de>             	<en>deactivate HUD</en>			        </text>
+		<text name="SowingCounter">             <de>Hektarzähler</de>            		<en>hectare counter</en>			    </text>
+		<text name="SowingSounds">              <de>Akustische Signale</de>            	<en>acoustic signals</en>			    </text>
 	</l10n>
 </modDesc>

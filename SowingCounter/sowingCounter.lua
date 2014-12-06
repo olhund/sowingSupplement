@@ -4,10 +4,10 @@
 --
 -- source: 		threshing counter v2.3 by Manuel Leithner (edit by gotchTOM)
 -- @author:  	Manuel Leithner/gotchTOM
--- @date:		19-Nov-2014
+-- @date:			6-Dec-2014
 -- @version:	v1.01
 -- @history:	v1.0 - initial implementation
---				v1.01 - part of SowingSupplement
+--						v1.01 - part of SowingSupplement
 --
 -- free for noncommerical-usage
 --
@@ -23,7 +23,7 @@ end;
 function SowingCounter:load(xmlFile)
 	
 	if self.activeModules ~= nil and self.activeModules.sowingCounter then
-	print("!!!!!!!!!!!!!!!!SowingCounter:load")
+	-- print("!!!!!!!!!!!!!!!!SowingCounter:load")
 		self.resetSessionHectars = SpecializationUtil.callSpecializationsFunction("resetSessionHectars");
 		self.updateSoCoGUI = SpecializationUtil.callSpecializationsFunction("updateSoCoGUI");
 		self.sowingCounter = {};
@@ -33,65 +33,32 @@ function SowingCounter:load(xmlFile)
 		self.sowingCounter.totalHectarsSent = 0;
 		self.sowingCounter.hectarTimer = 0;
 		self.sowingCounter.hectarPerHour = 0;
+		self.sowingCounter.hectarPerHourSent = 0;
 		self.sowingCounter.sowingCounterDirtyFlag = self:getNextDirtyFlag();
 		self:updateSoCoGUI();
 		
-		
-			self.sowingCounter.maxHUDposition = 2;
-			self.sowingCounter.totalHUD = {};
-			self.sowingCounter.sessionHUD = {};
-			local xPosOffset = g_currentMission.hudSelectionBackgroundOverlay.width / 12;
-			self.sowingCounter.totalHUD.xPos = g_currentMission.hudSelectionBackgroundOverlay.x + xPosOffset;
-			self.sowingCounter.sessionHUD.xPos = g_currentMission.hudSelectionBackgroundOverlay.x + g_currentMission.hudSelectionBackgroundOverlay.width/2 + xPosOffset;
-			local yPosOffset = g_currentMission.hudSelectionBackgroundOverlay.height * 0.1347368421;--0.035
-			self.sowingCounter.yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height + g_currentMission.hudBackgroundOverlay.height;
-			self.sowingCounter.yPosHUD = self.sowingCounter.yPos + yPosOffset;
-			self.sowingCounter.overlayHeight = g_currentMission.hudSelectionBackgroundOverlay.height * .57744362;--0.6544360902;
-			self.sowingCounter.overlayWidth = g_currentMission.hudSelectionBackgroundOverlay.width * .086434573;--0.0979591836;
+		--[[-- extra sowingCounter HUD when SowingSupp HUD is not active?
+			-- self.sowingCounter.maxHUDposition = 2;
+			-- self.sowingCounter.totalHUD = {};
+			-- self.sowingCounter.sessionHUD = {};
+			-- local xPosOffset = g_currentMission.hudSelectionBackgroundOverlay.width / 12;
+			-- self.sowingCounter.totalHUD.xPos = g_currentMission.hudSelectionBackgroundOverlay.x + xPosOffset;
+			-- self.sowingCounter.sessionHUD.xPos = g_currentMission.hudSelectionBackgroundOverlay.x + g_currentMission.hudSelectionBackgroundOverlay.width/2 + xPosOffset;
+			-- local yPosOffset = g_currentMission.hudSelectionBackgroundOverlay.height * 0.1347368421;--0.035
+			-- self.sowingCounter.yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height + g_currentMission.hudBackgroundOverlay.height;
+			-- self.sowingCounter.yPosHUD = self.sowingCounter.yPos + yPosOffset;
+			-- self.sowingCounter.overlayHeight = g_currentMission.hudSelectionBackgroundOverlay.height * .57744362;--0.6544360902;
+			-- self.sowingCounter.overlayWidth = g_currentMission.hudSelectionBackgroundOverlay.width * .086434573;--0.0979591836;
 			
-			self.sowingCounter.totalHUD.overlay = Overlay:new("hudSowingCounterTotalOverlay", Utils.getFilename("SowingCounter/SowingCounter_totalHUD.png", mod_directory), self.sowingCounter.totalHUD.xPos, self.sowingCounter.yPosHUD, self.sowingCounter.overlayWidth, self.sowingCounter.overlayHeight);
+			-- self.sowingCounter.totalHUD.overlay = Overlay:new("hudSowingCounterTotalOverlay", Utils.getFilename("img/SowingCounter_totalHUD.png", mod_directory), self.sowingCounter.totalHUD.xPos, self.sowingCounter.yPosHUD, self.sowingCounter.overlayWidth, self.sowingCounter.overlayHeight);
 			
-			self.sowingCounter.sessionHUD.overlay = Overlay:new("hudSowingCounterSessionOverlay", Utils.getFilename("SowingCounter/SowingCounter_sessionHUD.png", mod_directory), self.sowingCounter.sessionHUD.xPos, self.sowingCounter.yPosHUD, self.sowingCounter.overlayWidth, self.sowingCounter.overlayHeight);
+			-- self.sowingCounter.sessionHUD.overlay = Overlay:new("hudSowingCounterSessionOverlay", Utils.getFilename("img/SowingCounter_sessionHUD.png", mod_directory), self.sowingCounter.sessionHUD.xPos, self.sowingCounter.yPosHUD, self.sowingCounter.overlayWidth, self.sowingCounter.overlayHeight);
 			
-			self.sowingCounter.textSize = g_currentMission.fillLevelTextSize;
+			-- self.sowingCounter.textSize = g_currentMission.fillLevelTextSize;
 			
-			self.sowingCounter.backgroundOverlay = Overlay:new("hudSowingCounterBackgroundOverlay", Utils.getFilename("img/hud_bg.dds", mod_directory), g_currentMission.hudSelectionBackgroundOverlay.x, self.sowingCounter.yPos, g_currentMission.hudSelectionBackgroundOverlay.width, g_currentMission.hudSelectionBackgroundOverlay.height);
+			-- self.sowingCounter.backgroundOverlay = Overlay:new("hudSowingCounterBackgroundOverlay", Utils.getFilename("img/hud_bg.dds", mod_directory), g_currentMission.hudSelectionBackgroundOverlay.x, self.sowingCounter.yPos, g_currentMission.hudSelectionBackgroundOverlay.width, g_currentMission.hudSelectionBackgroundOverlay.height);]]
 	end;	
 end;
-
---[[function SowingCounter:postLoad(xmlFile)
-	if self.activeModules ~= nil and self.activeModules.sowingCounter then
-	print("!!!!!!!!!!!!!!!!SowingCounter:postLoad")
-		self.sowingCounter = {};
-		self.resetSessionHectars = SpecializationUtil.callSpecializationsFunction("resetSessionHectars");
-		self.sowingCounter.sessionHectars = 0;	
-		self.sowingCounter.sessionHectarsSent = 0;
-		self.sowingCounter.totalHectars = 0;
-		self.sowingCounter.totalHectarsSent = 0;
-		self.sowingCounter.hectarTimer = 0;
-		self.sowingCounter.hectarPerHour = 0;
-		self.sowingCounter.sowingCounterDirtyFlag = self:getNextDirtyFlag();
-		self.sowingCounter.maxHUDposition = 2;
-		self.sowingCounter.totalHUD = {};
-		self.sowingCounter.sessionHUD = {};
-		local xPosOffset = g_currentMission.hudSelectionBackgroundOverlay.width / 12;
-		self.sowingCounter.totalHUD.xPos = g_currentMission.hudSelectionBackgroundOverlay.x + xPosOffset;
-		self.sowingCounter.sessionHUD.xPos = g_currentMission.hudSelectionBackgroundOverlay.x + g_currentMission.hudSelectionBackgroundOverlay.width/2 + xPosOffset;
-		local yPosOffset = g_currentMission.hudSelectionBackgroundOverlay.height * 0.1347368421;--0.035
-		self.sowingCounter.yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height + g_currentMission.hudBackgroundOverlay.height;
-		self.sowingCounter.yPosHUD = self.sowingCounter.yPos + yPosOffset;
-		self.sowingCounter.overlayHeight = g_currentMission.hudSelectionBackgroundOverlay.height * .57744362;--0.6544360902;
-		self.sowingCounter.overlayWidth = g_currentMission.hudSelectionBackgroundOverlay.width * .086434573;--0.0979591836;
-		
-		self.sowingCounter.totalHUD.overlay = Overlay:new("hudSowingCounterTotalOverlay", Utils.getFilename("SowingCounter/SowingCounter_totalHUD.png", mod_directory), self.sowingCounter.totalHUD.xPos, self.sowingCounter.yPosHUD, self.sowingCounter.overlayWidth, self.sowingCounter.overlayHeight);
-		
-		self.sowingCounter.sessionHUD.overlay = Overlay:new("hudSowingCounterSessionOverlay", Utils.getFilename("SowingCounter/SowingCounter_sessionHUD.png", mod_directory), self.sowingCounter.sessionHUD.xPos, self.sowingCounter.yPosHUD, self.sowingCounter.overlayWidth, self.sowingCounter.overlayHeight);
-		
-		self.sowingCounter.textSize = g_currentMission.fillLevelTextSize;
-		
-		self.sowingCounter.backgroundOverlay = Overlay:new("hudSowingCounterBackgroundOverlay", Utils.getFilename("SowingCounter/SowingSupplementBackground.png", mod_directory), g_currentMission.hudSelectionBackgroundOverlay.x, self.sowingCounter.yPos, g_currentMission.hudSelectionBackgroundOverlay.width, g_currentMission.hudSelectionBackgroundOverlay.height, 0.5);
-	end;	
-end;]]
 
 function SowingCounter:delete()
 end;
@@ -99,15 +66,15 @@ end;
 function SowingCounter:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
 	if self.activeModules ~= nil and self.activeModules.sowingCounter and not resetVehicles then 
 		self.activeModules.sowingCounter = Utils.getNoNil(getXMLBool(xmlFile, key .. "#sowingCounterIsActiv"), self.activeModules.sowingCounter);
-		print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_sowingCounterIsActiv = "..tostring(self.activeModules.sowingCounter))
+		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_sowingCounterIsActiv = "..tostring(self.activeModules.sowingCounter))
 		if self.activeModules.sowingCounter then
 			self.sowingCounter.totalHectars =  Utils.getNoNil(getXMLFloat(xmlFile, key .. "#totalHectars"), 0);
-			print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_totalHectars = "..tostring(self.sowingCounter.totalHectars))
-			print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self:updateSoCoGUI()")
+			-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_totalHectars = "..tostring(self.sowingCounter.totalHectars))
+			-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self:updateSoCoGUI()")
 			self:updateSoCoGUI();
 		else
 			self.activeModules.num = self.activeModules.num - 1;
-			print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self.activeModules.num = "..tostring(self.activeModules.num))
+			-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self.activeModules.num = "..tostring(self.activeModules.num))
 		end;	
 	end;
     return BaseMission.VEHICLE_LOAD_OK;
@@ -118,7 +85,7 @@ function SowingCounter:getSaveAttributesAndNodes(nodeIdent)
 	if self.activeModules.sowingCounter then
 		attributes = attributes.. ' totalHectars="' .. tostring(self.sowingCounter.totalHectars) ..'"';
 	end;
-	print("!!!!!!!!!!!!!!SowingCounter:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
+	-- print("!!!!!!!!!!!!!!SowingCounter:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
 	return attributes;
 end;
 
@@ -133,7 +100,7 @@ end;
 
 function SowingCounter:readStream(streamId, connection)
 	if self.activeModules ~= nil and self.activeModules.sowingCounter then
-	print("!!!!!!!!!!SowingCounter:readStream")
+	-- print("!!!!!!!!!!SowingCounter:readStream")
 		local session = streamReadFloat32(streamId);
 		local total = streamReadFloat32(streamId);	
 		if self.sowingCounter ~= nil then
@@ -202,7 +169,7 @@ function SowingCounter:updateTick(dt)
 				self.sowingCounter.sessionHectarsSent = self.sowingCounter.sessionHectars;
 				self.sowingCounter.totalHectarsSent = self.sowingCounter.totalHectars;
 				if self.sosuHUDisActive then
-				print("SowingCounter:updateTick> 0.01 -> self:updateSoCoGUI()")
+					-- print("SowingCounter:updateTick> 0.01 -> self:updateSoCoGUI()")
 					self:updateSoCoGUI();
 				end;
 			end;
@@ -210,16 +177,17 @@ function SowingCounter:updateTick(dt)
 			self.sowingCounter.hectarTimer = timer + dt;
 			local hectarTimer = self.sowingCounter.hectarTimer/3600000
 			self.sowingCounter.hectarPerHour = self.sowingCounter.sessionHectars/hectarTimer;
+			if math.abs(self.sowingCounter.hectarPerHour - self.sowingCounter.hectarPerHourSent) > 0.1 then
+				self:updateSoCoGUI();
+			end;
 		end;
 	end;
 end;
 
 function SowingCounter:draw()
-
-	if self.activeModules ~= nil and self.activeModules.sowingCounter then
-		if self.sosuHUDisActive then
-			
-		else
+	-- extra sowingCounter HUD when SowingSupp HUD is not active?
+	--[[if self.activeModules ~= nil and self.activeModules.sowingCounter then
+		if not self.sosuHUDisActive then
 			self.sowingCounter.backgroundOverlay:render();
 			self.sowingCounter.totalHUD.overlay:render();
 			self.sowingCounter.sessionHUD.overlay:render();
@@ -261,19 +229,33 @@ function SowingCounter:draw()
 		
 		local haPerHour = math.floor(self.sowingCounter.hectarPerHour*10 + 0.5) / 10;
 		g_currentMission:addExtraPrintText(string.format("%.1f ha/h",haPerHour));
-	end;	
+	end;	]]
 end;
 
 function SowingCounter:updateSoCoGUI()
-print("!!!!!!!!!!!!!!!!!SowingCounter:updateSoCoGUI()")
-	local counterSession = math.floor(self.sowingCounter.sessionHectars*100 + 0.5) / 100;
-	local counterTotal = math.floor(self.sowingCounter.totalHectars*10 + 0.5) / 10;
-	local haPerHour = math.floor(self.sowingCounter.hectarPerHour*10 + 0.5) / 10; 
-	local textSize = g_currentMission.fillLevelTextSize;
-	-- create gui tiles (grid position [int], function to call [string], parameter1, parameter2, style [string], label [string], value [], is visible [bool], [Grafik], textSize [float])
-	self.tile.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "info", nil, counterSession.."ha", true, "SowingCounter_sessionHUD.dds", textSize);
-	self.tile.scHaPerHour = SowingSupp.guiElement:New( 2, nil, nil, nil, "info", nil, "("..haPerHour.."ha/h)", true, nil, textSize);
-	self.tile.scTotal = SowingSupp.guiElement:New( 3, nil, nil, nil, "info", nil, counterTotal.."ha", true, "SowingCounter_totalHUD.dds", textSize);
+	if self.activeModules ~= nil then
+		if self.activeModules.sowingCounter then
+			local counterSession = math.floor(self.sowingCounter.sessionHectars*100 + 0.5) / 100;
+			local counterTotal = math.floor(self.sowingCounter.totalHectars*10 + 0.5) / 10;
+			local fullSession = math.floor(counterSession);
+			local fullTotal = math.floor(counterTotal);
+			local deciSession = math.floor((counterSession - fullSession)*100);
+			if deciSession < 10 then
+				deciSession = "0" .. deciSession;
+			end;
+			local deciTotal = math.floor((counterTotal - fullTotal)*10);
+			local counterHaPerHour = math.floor(self.sowingCounter.hectarPerHour*10 + 0.5) / 10; 
+			local fullHaPerHour = math.floor(counterHaPerHour);
+			local deciHaPerHour = (counterHaPerHour - fullHaPerHour)*10;
+			self.grid1.elements.scSession.isVisible = true;
+			self.grid1.elements.scTotal.isVisible = true;
+			self.grid1.elements.scSession.value = fullSession.."."..deciSession.."ha   ("..fullHaPerHour.."."..deciHaPerHour.."ha/h)";
+			self.grid1.elements.scTotal.value = fullTotal.."."..deciTotal.."ha";
+		else
+			self.grid1.elements.scSession.isVisible = false;
+			self.grid1.elements.scTotal.isVisible = false;
+		end;
+	end;
 end;
 
 --

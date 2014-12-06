@@ -7,42 +7,38 @@ SowingSupp_Register = {};
 function SowingSupp_Register:loadMap(name)
 	if self.firstRun == nil then
 		self.firstRun = false;
-		print("--- loading SowingSupplement mod beta --- (by webalizer and gotchTOM)")
 
 		for k, v in pairs(VehicleTypeUtil.vehicleTypes) do
 			if v ~= nil then
 				for i = 1, table.maxn(v.specializations) do
 					local vs = v.specializations[i];
 					if vs ~= nil and vs == SpecializationUtil.getSpecialization("sowingMachine") then
-						local allowSowingSuppInsertion = true;
-						local allowSowingCounterInsertion = true;
-					
+						local allowInsertion = true;
 						local v_name_string = v.name
 						local point_location = string.find(v_name_string, ".", nil, true)
 						if point_location ~= nil then
 							local _name = string.sub(v_name_string, 1, point_location-1);
-							--SowingSupp
 							if rawget(SpecializationUtil.specializations, string.format("%s.sowingSupp", _name)) ~= nil then
-								allowSowingSuppInsertion = false;
+								allowInsertion = false;
 								print(tostring(v.name)..": Specialization sowingSupp is present! SowingSupp was not inserted!");
 							end;
 							if rawget(SpecializationUtil.specializations, string.format("%s.SowingSupp", _name)) ~= nil then
-								allowSowingSuppInsertion = false;
+								allowInsertion = false;
 								print(tostring(v.name)..": Specialization SowingSupp is present! SowingSupp was not inserted!");
 							end;
-							-- if rawget(SpecializationUtil.specializations, string.format("%s.F_35", _name)) ~= nil then
-								-- allowInsertion = false;
-								-- print(tostring(v.name)..": Specialization F_35 is present! SowingSupp was not inserted!");
-							-- end;
+							if rawget(SpecializationUtil.specializations, string.format("%s.F_35", _name)) ~= nil then
+								allowInsertion = false;
+								print(tostring(v.name)..": Specialization F_35 is present! SowingSupp was not inserted!");
+							end;
 						end;
-						if allowSowingSuppInsertion then
-							print("adding SowingSupp to:"..tostring(v.name));
+						if allowInsertion then
+							-- print("adding SowingSupp to:"..tostring(v.name));
 							table.insert(v.specializations, SpecializationUtil.getSpecialization("sowingSupp"));
 							vs.SOWINGSUPP_HUDon = g_i18n:getText("SOWINGSUPP_HUDon");
 							vs.SOWINGSUPP_HUDoff = g_i18n:getText("SOWINGSUPP_HUDoff");
-							print("adding SowingCounter to:"..tostring(v.name));
+							vs.SowingCounter = g_i18n:getText("SowingCounter");
+							vs.SowingSounds = g_i18n:getText("SowingSounds");
 							table.insert(v.specializations, SpecializationUtil.getSpecialization("sowingCounter"));
-							print("adding SowingSounds to:"..tostring(v.name));
 							table.insert(v.specializations, SpecializationUtil.getSpecialization("sowingSounds"));
 						end;
 					end;
