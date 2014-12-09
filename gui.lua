@@ -224,7 +224,7 @@ function SowingSupp.guiElement:render(grid)
       else
         renderOverlay(self.buttonSet.overlays.overlayToggleSndOff, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight)
       end;
-	  
+
     elseif self.style == "toggleModul" then
       setTextAlignment(RenderText.ALIGN_CENTER);
 	  local iconHeight = .9 * guiElementHeight;
@@ -244,12 +244,12 @@ function SowingSupp.guiElement:render(grid)
       -- else
         -- renderText((grid.table[self.gridPos].x + 0.004), (grid.table[self.gridPos].y + 0.006), self.textSize, tostring(self.value));
       -- end;
-	
+
 	-- elseif self.style == "infoTEST" then
       -- setTextAlignment(RenderText.ALIGN_LEFT);
       -- renderText((grid.table[self.gridPos].x), (grid.table[self.gridPos].y), self.textSize, tostring(self.value));
-	  
-	elseif self.style == "infoSoCoSession" then
+
+	elseif self.style == "info" then
       setTextAlignment(RenderText.ALIGN_LEFT);
 	  local iconHeight = .8 * guiElementHeight;
 	  local iconWidth = iconHeight / g_screenAspectRatio;
@@ -258,22 +258,12 @@ function SowingSupp.guiElement:render(grid)
 	  local xOffsetText =  iconWidth + 3 * offsetIcon;--guiElementHeight * .84;
 	  local yOffsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
       renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.value));
-	
-	elseif self.style == "infoSoCoTotal" then
-      setTextAlignment(RenderText.ALIGN_LEFT);
-	  local iconHeight = .8 * guiElementHeight;
-	  local iconWidth = iconHeight / g_screenAspectRatio;
-	  local offsetIcon = guiElementHeight * 0.05;
-      renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
-	  local xOffsetText = iconWidth + 3 * offsetIcon;--guiElementHeight * .84;
-	  local yOffsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
-      renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.value));
-	
+
 	elseif self.style == "infoModul" then
       setTextAlignment(RenderText.ALIGN_LEFT);
 	  local offsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
       renderText((grid.table[self.gridPos].x - offsetText), (grid.table[self.gridPos].y + offsetText), self.textSize, tostring(self.value));
-	  
+
     elseif self.style == "titleBar" then
       renderOverlay(self.buttonSet.overlays.overlayRowBg, grid.table[self.gridPos].x, grid.table[self.gridPos].y, grid.rightX, grid.height);
       setTextAlignment(RenderText.ALIGN_CENTER);
@@ -302,7 +292,7 @@ end;
 function SowingSupp.hudGrid:mouseEvent(vehicle, posX, posY, isDown, isUp, button)
   if self.isVisible then
     if self.move then
-	  -- 
+	  --
       self:changeGrid(math.min(posX,g_currentMission.hudSelectionBackgroundOverlay.x), math.min(posY, 1 - (self.rows * self.height)));
     end;
     for k, guiElement in pairs(self.elements) do

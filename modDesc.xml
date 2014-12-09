@@ -13,14 +13,14 @@
  	</description>
     <multiplayer supported="true"/>
 	<iconFilename>store.png</iconFilename>
-	<version>0.03</version>
+	<version>0.04</version>
 	<extraSourceFiles>
         <sourceFile filename="register.lua" />
     </extraSourceFiles>
 	<inputBindings>
-		<input name="SOWINGSUPP_HUD"       			category="VEHICLE" key1="KEY_lctrl KEY_4"   			key2="" button="" device="0" mouse="" visible="true" /> 
-		<input name="SOWINGSUPP_MOUSE"       		category="VEHICLE" key1="KEY_lctrl"   					key2="" button="" device="0" mouse="" visible="true" /> 	
-    </inputBindings>	
+		<input name="SOWINGSUPP_HUD"       			category="VEHICLE" key1="KEY_lctrl KEY_4"   			key2="" button="" device="0" mouse="" visible="true" />
+		<input name="SOWINGSUPP_MOUSE"       		category="VEHICLE" key1="KEY_lctrl"   					key2="" button="" device="0" mouse="" visible="true" />
+    </inputBindings>
 	<l10n>
 		<!-- Buttons -->
 		<text name="SOWINGSUPP_HUD">            <de>SowingSupp HUD aktivieren</de>      <en>SowingSupp HUD activate</en>		</text>

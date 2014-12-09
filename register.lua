@@ -3,10 +3,13 @@ SpecializationUtil.registerSpecialization("sowingCounter", "SowingCounter", g_cu
 SpecializationUtil.registerSpecialization("sowingSounds", "SowingSounds", g_currentModDirectory.."SowingSounds/sowingSounds.lua")
 
 SowingSupp_Register = {};
+local modItem = ModsUtil.findModItemByModName(g_currentModName);
+SowingSupp_Register.version = (modItem and modItem.version) and modItem.version or "?.?.?";
 
 function SowingSupp_Register:loadMap(name)
 	if self.firstRun == nil then
 		self.firstRun = false;
+		print('*** SowingSupplement v'..SowingSupp_Register.version..' specialization loading ***');
 
 		for k, v in pairs(VehicleTypeUtil.vehicleTypes) do
 			if v ~= nil then

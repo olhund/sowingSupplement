@@ -7,8 +7,8 @@
 --	@version: 	v0.06
 --
 -- included modules: sowingCounter, sowingSounds
--- 
--- added modules: 
+--
+-- added modules:
 -- 		sowingCounter:			hectar counter for seeders
 -- 		sowingSounds:			acoustic signals for seeders
 --
@@ -33,27 +33,27 @@ function SowingSupp:load(xmlFile)
 		if SowingSupp.isDedi == nil then
 			SowingSupp.isDedi = SowingSupp:checkIsDedi();
 		end;
-		if not SowingSupp.isDedi then 
+		if not SowingSupp.isDedi then
 			SowingSupp:loadConfigFile(self);
-		end;	
-		
+		end;
+
 		print("SowingSupp:load - check:")
 		for name,value in pairs(self.activeModules) do
 			print(name," ",tostring(value))
 		end;
 	end;
-	self.sosuHUDisActive = false;		
-	self.lastNumActiveHUDs = -1;	
+	self.sosuHUDisActive = false;
+	self.lastNumActiveHUDs = -1;
 	SowingSupp.stopMouse = false;
 
 	SowingSupp.snd_click = createSample("snd_click");
 	loadSample(SowingSupp.snd_click, Utils.getFilename("snd/snd_click.wav", SowingSupp.path), false);
-	
-	-- create grids in function updateGrids(), so grids can be updated if other HUDs are on start-position and grid2 is updated if grid1 was moved 
+
+	-- create grids in function updateGrids(), so grids can be updated if other HUDs are on start-position and grid2 is updated if grid1 was moved
 	self.updateGrids = SpecializationUtil.callSpecializationsFunction("updateGrids");
 	local xPos, yPos = g_currentMission.hudSelectionBackgroundOverlay.x, g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height + g_currentMission.hudBackgroundOverlay.height;
 	self:updateGrids(xPos, yPos);
-	
+
 
 end;
 
@@ -141,7 +141,7 @@ function SowingSupp:update(dt)
 				self.grid1.isVisible = true;
 			end;
 		end;
-		if InputBinding.isPressed(InputBinding.SOWINGSUPP_MOUSE) and self.sosuHUDisActive then 
+		if InputBinding.isPressed(InputBinding.SOWINGSUPP_MOUSE) and self.sosuHUDisActive then
 			if not SowingSupp.stopMouse then
 				SowingSupp.stopMouse = true;
 				InputBinding.setShowMouseCursor(true);
@@ -167,15 +167,15 @@ function SowingSupp:updateTick(dt)
 			self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs = 0;
 		end;
 		if self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs ~= self.lastNumActiveHUDs and self.grid1.baseX == g_currentMission.hudSelectionBackgroundOverlay.x then
-			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height*(self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) + 
+			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height*(self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) +
 	g_currentMission.hudSelectionBackgroundOverlay.height*.038 + g_currentMission.hudBackgroundOverlay.height;
-			
+
 			self:updateGrids(self.grid1.baseX, yPos);
-			
+
 			self.lastNumActiveHUDs = self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs;
 		end;
 	end;
-end;	
+end;
 
 function SowingSupp:draw()
 	if SowingSupp.stopMouse then
@@ -187,27 +187,27 @@ function SowingSupp:draw()
 		g_currentMission:addHelpButtonText(SowingMachine.SOWINGSUPP_HUDoff, InputBinding.SOWINGSUPP_HUD);
 	else
 		g_currentMission:addHelpButtonText(SowingMachine.SOWINGSUPP_HUDon, InputBinding.SOWINGSUPP_HUD);
-	end;	
+	end;
 end;
 
 function SowingSupp:loadConfigFile(self)
 	-- local path = getUserProfileAppPath();
 	local Xml;
 	local file = g_modsDirectory.."/sowingSupplement_config.xml";
-		
+
 	if fileExists(file) then
 		print("loading "..file.." for sowingSupplement-Mod configuration");
-		Xml = loadXMLFile("sowingSupplement_XML", file, "sowingSupplement");		
+		Xml = loadXMLFile("sowingSupplement_XML", file, "sowingSupplement");
 	else
 		print("creating "..file.." for sowingSupplement-Mod configuration");
 		Xml = createXMLFile("sowingSupplement_XML", file, "sowingSupplement");
 	end;
-	
+
 	local moduleList = {"sowingCounter","sowingSounds"};
-		
+
 	for _,field in pairs(moduleList) do
 		local XmlField = string.upper(string.sub(field,1,1))..string.sub(field,2);
-		
+
 		local res = getXMLBool(Xml, "sowingSupplement.Modules."..XmlField);
 
 		if res ~= nil then
@@ -224,7 +224,7 @@ function SowingSupp:loadConfigFile(self)
 			print("sowingSupplement module "..field.." inserted into xml and started");
 		end;
 	end;
-		
+
 	saveXMLFile(Xml);
 end;
 
@@ -232,13 +232,13 @@ function SowingSupp:updateGrids(xPos, yPos)
 
 	local gridWidth = g_currentMission.hudSelectionBackgroundOverlay.width/3;
 	local gridHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
-	
+
 	self.grid1 = {};
 	self.grid1 = SowingSupp.hudGrid:New(xPos, yPos, 9, 3, gridWidth, gridHeight, true);
 
 	self.grid2 = {};
 	self.grid2 = SowingSupp.hudGrid:New(self.grid1.baseX - g_currentMission.hudSelectionBackgroundOverlay.width - gridHeight*.038, self.grid1.baseY, 8, 3, gridWidth, gridHeight, false);
-		
+
 
 	self.texts = {};
 	-- self.texts.dlMode = "Modus";
@@ -246,23 +246,18 @@ function SowingSupp:updateGrids(xPos, yPos)
 	self.grid1.elements = {};
 	-- create gui elements ( grid position [int], function to call [string], parameter1, parameter2, style [string], label [string], value [], is visible [bool], [Grafik], textSize [float])
 	self.grid1.elements.titleBar = SowingSupp.guiElement:New( 25, "titleBar", "configHud", "close", "titleBar", "Sowing Supplement", nil, true, nil, g_currentMission.missionStatusTextSize);
-	if self.activeModules.sowingSounds then	
+	if self.activeModules.sowingSounds then
 		self.grid1.elements.sowingSound = SowingSupp.guiElement:New( 3, "toggleSound", nil, nil, "toggleSound", "Sounds", true, true, nil, g_currentMission.cruiseControlTextSize);
-	else		
+	else
 		self.grid1.elements.sowingSound = SowingSupp.guiElement:New( 3, "toggleSound", nil, nil, "toggleSound", "Sounds", false, false, nil, g_currentMission.cruiseControlTextSize);
 	end;
-	if self.activeModules.sowingCounter then	
-		self.grid1.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoSoCoSession", nil, "0.00ha   (0.0ha/h)", true, "SowingCounter_sessionHUD.dds", g_currentMission.fillLevelTextSize);
-		self.grid1.elements.scTotal = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoSoCoTotal", nil, "0.0ha", true, "SowingCounter_totalHUD.dds", g_currentMission.fillLevelTextSize);
-	else	
-		self.grid1.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoSoCoSession", nil, "0.00ha   (0.0ha/h)", false, "SowingCounter_sessionHUD.dds", g_currentMission.fillLevelTextSize);
-		self.grid1.elements.scTotal = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoSoCoTotal", nil, "0.0ha", false, "SowingCounter_totalHUD.dds", g_currentMission.fillLevelTextSize);
-	end;
-	
+	self.grid1.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "info", nil, "0.00ha   (0.0ha/h)", self.activeModules.sowingCounter, "SowingCounter_sessionHUD.dds", g_currentMission.fillLevelTextSize);
+		self.grid1.elements.scTotal = SowingSupp.guiElement:New( 4, nil, nil, nil, "info", nil, "0.0ha", self.activeModules.sowingCounter, "SowingCounter_totalHUD.dds", g_currentMission.fillLevelTextSize);
+
 	-- self.grid1.elements.test1 = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
 	-- self.grid1.elements.test2 = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
 	-- self.grid1.elements.test3 = SowingSupp.guiElement:New( 7, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
-	
+
 	-- self.grid1.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "info", nil, "0.5 ha", true, "SowingCounter_sessionHUD.dds");
 	-- self.grid1.elements.scTotal = SowingSupp.guiElement:New( 2, nil, nil, nil, "info", nil, "25.0 ha", true, "SowingCounter_totalHUD.dds");
 	-- self.grid1.elements.scInfo = SowingSupp.guiElement:New( 4, nil, nil, nil, "info", nil, "Dies ist ein Test-Text!", true, nil);
@@ -270,18 +265,18 @@ function SowingSupp:updateGrids(xPos, yPos)
 	-- self.grid1.elements.changeSomething = SowingSupp.guiElement:New( 20, "changeSomething", -3, 1, "plusminus", "Verschieben", 21, true, nil);
 	-- self.grid1.elements.toggleFunction = SowingSupp.guiElement:New( 21, "toggleOnOff", nil, nil, "toggle", "Toggle", true, true, nil);
 
-	
+
 	self.grid2.elements = {};
 	-- create gui elements (self, grid position [int], function to call [string], parameter1, parameter2, style [string], label [string], value [], is visible [bool], [Grafik], textSize [float])
 	self.grid2.elements.soCoModulIcon = SowingSupp.guiElement:New( 1, "toggleSoCoModul", nil, nil, "toggleModul", "", self.activeModules.sowingCounter, true, nil);
 	self.grid2.elements.soCoModulText = SowingSupp.guiElement:New( 2, nil, nil, nil, "infoModul", nil, SowingMachine.SowingCounter, true, nil, g_currentMission.fillLevelTextSize);
 	self.grid2.elements.soSoModulIcon = SowingSupp.guiElement:New( 4, "toggleSoSoModul", nil, nil, "toggleModul", "", self.activeModules.sowingSounds, true, nil);
 	self.grid2.elements.soSoModulText = SowingSupp.guiElement:New( 5, nil, nil, nil, "infoModul", nil,  SowingMachine.SowingSounds, true, nil, g_currentMission.fillLevelTextSize);
-	
+
 	-- self.grid2.elements.test1 = SowingSupp.guiElement:New( 1, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
 	-- self.grid2.elements.test2 = SowingSupp.guiElement:New( 4, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
 	-- self.grid2.elements.test3 = SowingSupp.guiElement:New( 7, nil, nil, nil, "infoTEST", nil, "___________________________________________", true, nil, g_currentMission.cruiseControlTextSize);
-	
+
 	-- self.grid2.elements.scInfo = SowingSupp.guiElement:New( 4, nil, nil, nil, "info", nil, "Weiterer Test-Text!", true, nil);
 	-- self.grid2.elements.dlMode = SowingSupp.guiElement:New( 19, "changeMode", -1, 1, "arrow", self.texts.dlMode, "AUTO", true, nil);
 	-- self.grid2.elements.changeSomething = SowingSupp.guiElement:New( 20, "changeSomething", -3, 1, "plusminus", "Plus/Minus", 21, true, nil);
