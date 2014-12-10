@@ -85,18 +85,20 @@ function SowingSupp.guiElement:New ( gridPos, functionToCall, parameter1, parame
 	obj.value = value;
 	obj.isVisible = isVisible;
 	obj.textSize = textSize;
-	if graphic ~= nil then
-		obj.graphic = createImageOverlay(Utils.getFilename("img/"..graphic, SowingSupp.path));
-	end;
+	if style == "info" or style == "separator" then
+    if graphic ~= nil then
+		  obj.graphic = createImageOverlay(Utils.getFilename("img/"..graphic..".dds", SowingSupp.path));
+	  end;
+  end;
 	if obj.functionToCall ~= nil then
-		obj.buttonSet = SowingSupp.buttonSet:New( obj.functionToCall, obj.style, obj.gridPos )
+		obj.buttonSet = SowingSupp.buttonSet:New( obj.functionToCall, obj.style, obj.gridPos, graphic )
 	end;
 	return obj;
 end;
 
 -- Create object "buttonSet"
 SowingSupp.buttonSet = {}
-function SowingSupp.buttonSet:New ( functionToCall, style, gridPos )
+function SowingSupp.buttonSet:New ( functionToCall, style, gridPos, graphic )
   local obj = setmetatable ( { }, { __index = self } )
   obj.button1IsActive = true;
   obj.button2IsActive = true;
@@ -112,15 +114,14 @@ function SowingSupp.buttonSet:New ( functionToCall, style, gridPos )
     obj.overlays.overlayPlus = createImageOverlay(Utils.getFilename("img/button_Right.dds", SowingSupp.path));
 
   elseif style == "toggle" then -- toggle
-    obj.overlays.overlayToggleOff = createImageOverlay(Utils.getFilename("img/button_Off.dds", SowingSupp.path));
-    obj.overlays.overlayToggleOn = createImageOverlay(Utils.getFilename("img/button_On.dds", SowingSupp.path));
-  elseif style == "toggleSound" then -- toggle
-    obj.overlays.overlayToggleSndOff = createImageOverlay(Utils.getFilename("img/button_SoundOff.dds", SowingSupp.path));
-    obj.overlays.overlayToggleSndOn = createImageOverlay(Utils.getFilename("img/button_SoundOn.dds", SowingSupp.path));
-  elseif style == "toggleModul" then -- toggle
-    obj.overlays.overlayToggleModulOff = createImageOverlay(Utils.getFilename("img/button_ModulOff.dds", SowingSupp.path));
-    obj.overlays.overlayToggleModulOn = createImageOverlay(Utils.getFilename("img/button_ModulOn.dds", SowingSupp.path));
-  elseif style == "titleBar" then -- toggle
+    obj.overlays.overlayToggleOff = createImageOverlay(Utils.getFilename("img/2_"..graphic..".dds", SowingSupp.path));
+    obj.overlays.overlayToggleOn = createImageOverlay(Utils.getFilename("img/1_"..graphic..".dds", SowingSupp.path));
+
+  elseif style == "option" then -- option on/off
+    obj.overlays.overlayToggleOptionOff = createImageOverlay(Utils.getFilename("img/2_"..graphic..".dds", SowingSupp.path));
+    obj.overlays.overlayToggleOptionOn = createImageOverlay(Utils.getFilename("img/1_"..graphic..".dds", SowingSupp.path));
+
+  elseif style == "titleBar" then -- title Bar
     obj.overlays.overlayRowBg = createImageOverlay(Utils.getFilename("img/row_bg.dds", SowingSupp.path));
     obj.overlays.overlayConfig = createImageOverlay(Utils.getFilename("img/button_Config.dds", SowingSupp.path));
     obj.overlays.overlayClose = createImageOverlay(Utils.getFilename("img/button_Close.dds", SowingSupp.path));
@@ -128,7 +129,8 @@ function SowingSupp.buttonSet:New ( functionToCall, style, gridPos )
 
   -- Create button click areas
   obj.areas = { plus = {}, minus = {}, toggle = {}, titleBar = {}, titleBarMove = {}};
-  local guiElementHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
+  local baseHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
+  local baseWidth = baseHeight / g_screenAspectRatio;
   if style == "plusminus" or style == "arrow" then -- plus minus & arrow
     obj.areas.minus.xMin = -0.0145;
     obj.areas.minus.xMax = -0.0045;
@@ -139,33 +141,29 @@ function SowingSupp.buttonSet:New ( functionToCall, style, gridPos )
     obj.areas.plus.yMin = obj.areas.minus.yMin;
     obj.areas.plus.yMax = obj.areas.minus.yMax;
   elseif style == "toggle" then
-    obj.areas.toggle.xMin = -0.009;
-    obj.areas.toggle.xMax = 0.01;
-    obj.areas.toggle.yMin = 0.005;
-    obj.areas.toggle.yMax = 0.033;
-  elseif style == "toggleSound" then
-    local iconWidth = 1.2 * guiElementHeight / g_screenAspectRatio;
+    local iconWidth = 1.2 * baseWidth;
     obj.areas.toggle.xMin = -iconWidth/2;---0.009;
     obj.areas.toggle.xMax =  iconWidth/2;--0.01;
-    obj.areas.toggle.yMin = .2 * guiElementHeight;--0.005;
-    obj.areas.toggle.yMax = 1.25 * guiElementHeight;--0.033;
-  elseif style == "toggleModul" then
-    local iconWidth = .9 * guiElementHeight / g_screenAspectRatio;
-    obj.areas.toggle.xMin = -iconWidth/2;---0.009;
-    obj.areas.toggle.xMax = iconWidth/2;--0.01;
-    obj.areas.toggle.yMin = .1 * guiElementHeight;--0.005;
-    obj.areas.toggle.yMax = .9 * guiElementHeight;--0.033;
+    obj.areas.toggle.yMin = .2 * baseHeight;--0.005;
+    obj.areas.toggle.yMax = 1.25 * baseHeight;--0.033;
+  elseif style == "option" then
+    local iconWidth = .8 * baseWidth;
+    local offsetIcon = baseHeight * 0.1;
+    obj.areas.toggle.xMin = offsetIcon;---0.009;
+    obj.areas.toggle.xMax = offsetIcon + iconWidth;--0.01;
+    obj.areas.toggle.yMin = .1 * baseHeight;--0.005;
+    obj.areas.toggle.yMax = .8 * baseHeight;--0.033;
   elseif style == "titleBar" then
-    local iconWidth = .8 * guiElementHeight / g_screenAspectRatio;
-		local offsetIcon = guiElementHeight * 0.1;
+    local iconWidth = .6 * baseWidth;
+		local offsetIcon = baseHeight * 0.2;
     obj.areas.titleBar.xMin = offsetIcon;--0.005;
     obj.areas.titleBar.xMax = offsetIcon + iconWidth;--0.015;
-    obj.areas.titleBar.yMin = .15 * guiElementHeight;--0.004;
-    obj.areas.titleBar.yMax = .85 * guiElementHeight;--0.018;
+    obj.areas.titleBar.yMin = .15 * baseHeight;--0.004;
+    obj.areas.titleBar.yMax = .85 * baseHeight;--0.018;
     obj.areas.titleBarMove.xMin = iconWidth + 3 * offsetIcon;--0.025;
     obj.areas.titleBarMove.xMax = iconWidth + 3 * offsetIcon;--0.1;
-    obj.areas.titleBarMove.yMin =  .1 * guiElementHeight;--0.004;
-    obj.areas.titleBarMove.yMax = .9 * guiElementHeight;--0.018;
+    obj.areas.titleBarMove.yMin =  .1 * baseHeight;--0.004;
+    obj.areas.titleBarMove.yMax = .9 * baseHeight;--0.018;
   end;
   return obj
 end;
@@ -185,7 +183,7 @@ function SowingSupp.guiElement:render(grid)
   if self.isVisible then
     setTextColor(1,1,1,1);
     setTextBold(false);
-	local guiElementHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
+    local baseHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
 
     if self.style == "plusminus" or self.style == "arrow" then
       setTextAlignment(RenderText.ALIGN_CENTER);
@@ -201,82 +199,66 @@ function SowingSupp.guiElement:render(grid)
         setOverlayColor(self.buttonSet.overlays.overlayPlus, 1, 1, 1, 0.1);
       else
         setOverlayColor(self.buttonSet.overlays.overlayPlus, 1, 1, 1, 1);
-        end;
+      end;
       renderOverlay(self.buttonSet.overlays.overlayPlus, grid.table[self.gridPos].x + grid.centerX + 0.005, grid.table[self.gridPos].y + 0.005, 0.01, 0.015);
 
-    -- elseif self.style == "toggle" then
-      -- setTextAlignment(RenderText.ALIGN_CENTER);
-      -- renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 0.045), 0.01, tostring(self.label));
-      -- if self.value then
-        -- renderOverlay(self.buttonSet.overlays.overlayToggleOn, grid.table[self.gridPos].x + grid.centerX - 0.01, grid.table[self.gridPos].y + 0.005, 0.02, 0.03)
-      -- else
-        -- renderOverlay(self.buttonSet.overlays.overlayToggleOff, grid.table[self.gridPos].x + grid.centerX - 0.01, grid.table[self.gridPos].y + 0.005, 0.02, 0.03);
-      -- end;
-    elseif self.style == "toggleSound" then
+    elseif self.style == "toggle" then
       setTextAlignment(RenderText.ALIGN_CENTER);
-	  local iconHeight = 1.2 * guiElementHeight;
-	  local iconWidth = iconHeight / g_screenAspectRatio;
-	  local yOffsetIcon = guiElementHeight * 0.15;
-	  local yOffsetText = yOffsetIcon + 1.1 * iconHeight;
+      local iconHeight = 1.2 * baseHeight;
+      local iconWidth = iconHeight / g_screenAspectRatio;
+      local yOffsetIcon = baseHeight * 0.15;
+      local yOffsetText = yOffsetIcon + 1.1 * iconHeight;
       renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.label));
       if self.value then
-        renderOverlay(self.buttonSet.overlays.overlayToggleSndOn, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight);
+        renderOverlay(self.buttonSet.overlays.overlayToggleOn, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight);
       else
-        renderOverlay(self.buttonSet.overlays.overlayToggleSndOff, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight)
+        renderOverlay(self.buttonSet.overlays.overlayToggleOff, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight)
       end;
 
-    elseif self.style == "toggleModul" then
-      setTextAlignment(RenderText.ALIGN_CENTER);
-	  local iconHeight = .9 * guiElementHeight;
-	  local iconWidth = iconHeight / g_screenAspectRatio;
-	  local yOffsetIcon = guiElementHeight * .76;--0.02;
+    elseif self.style == "option" then
+      local iconHeight = .8 * baseHeight;
+      local iconWidth = iconHeight / g_screenAspectRatio;
+      local offsetIcon = baseHeight * 0.11;
       if self.value then
-        renderOverlay(self.buttonSet.overlays.overlayToggleModulOn, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon * guiElementHeight, iconWidth, iconHeight);
+        renderOverlay(self.buttonSet.overlays.overlayToggleOptionOn, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
       else
-        renderOverlay(self.buttonSet.overlays.overlayToggleModulOff, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon * guiElementHeight, iconWidth, iconHeight);
+        renderOverlay(self.buttonSet.overlays.overlayToggleOptionOff, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
       end;
-
-    -- elseif self.style == "info" then
-      -- setTextAlignment(RenderText.ALIGN_LEFT);
-      -- if self.graphic ~= nil then
-        -- renderOverlay(self.graphic, grid.table[self.gridPos].x + 0.004, grid.table[self.gridPos].y + 0.004, 0.012, 0.018);
-        -- renderText((grid.table[self.gridPos].x + 0.018), (grid.table[self.gridPos].y + 0.006), self.textSize, tostring(self.value));
-      -- else
-        -- renderText((grid.table[self.gridPos].x + 0.004), (grid.table[self.gridPos].y + 0.006), self.textSize, tostring(self.value));
-      -- end;
-
-	-- elseif self.style == "infoTEST" then
-      -- setTextAlignment(RenderText.ALIGN_LEFT);
-      -- renderText((grid.table[self.gridPos].x), (grid.table[self.gridPos].y), self.textSize, tostring(self.value));
-
-	elseif self.style == "info" then
       setTextAlignment(RenderText.ALIGN_LEFT);
-	  local iconHeight = .8 * guiElementHeight;
-	  local iconWidth = iconHeight / g_screenAspectRatio;
-	  local offsetIcon = guiElementHeight * 0.05;
+      local xOffsetText =  iconWidth + 3 * offsetIcon;--baseHeight * .84;
+      local yOffsetText = baseHeight * .28;--yOffsetText fillLevelTextSize
+      renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.label));
+
+    elseif self.style == "info" then
+      setTextAlignment(RenderText.ALIGN_LEFT);
+      local iconHeight = .8 * baseHeight;
+      local iconWidth = iconHeight / g_screenAspectRatio;
+      local offsetIcon = baseHeight * 0.05;
       renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
-	  local xOffsetText =  iconWidth + 3 * offsetIcon;--guiElementHeight * .84;
-	  local yOffsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
+      local xOffsetText =  iconWidth + 3 * offsetIcon;--baseHeight * .84;
+      local yOffsetText = baseHeight * .28;--yOffsetText fillLevelTextSize
       renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.value));
 
-	elseif self.style == "infoModul" then
-      setTextAlignment(RenderText.ALIGN_LEFT);
-	  local offsetText = guiElementHeight * .28;--yOffsetText fillLevelTextSize
-      renderText((grid.table[self.gridPos].x - offsetText), (grid.table[self.gridPos].y + offsetText), self.textSize, tostring(self.value));
+    elseif self.style == "separator" then
+      local offsetSep = baseHeight * 0.1;
+      --renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetSep, grid.table[self.gridPos].y, sepWidth - offsetSep, 0.01);
+      setOverlayColor(self.graphic, 1, 1, 1, 0.25);
+      renderOverlay(self.graphic, grid.baseX + offsetSep, grid.table[self.gridPos].y, grid.columns * grid.width - (2*offsetSep), 0.001);
 
     elseif self.style == "titleBar" then
+      setOverlayColor(self.buttonSet.overlays.overlayRowBg, .01, .01, .01, 1);
       renderOverlay(self.buttonSet.overlays.overlayRowBg, grid.table[self.gridPos].x, grid.table[self.gridPos].y, grid.rightX, grid.height);
       setTextAlignment(RenderText.ALIGN_CENTER);
-	  local yOffsetText = guiElementHeight * 0.269;--yOffsetText missionStatusTextSize
+      local yOffsetText = baseHeight * 0.269;--yOffsetText missionStatusTextSize
       renderText((grid.table[self.gridPos].x + g_currentMission.hudSelectionBackgroundOverlay.width/2), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.label));
       if not self.buttonSet.button1IsActive then
         setOverlayColor(self.buttonSet.overlays.overlayConfig, 1, 1, 1, 0);
       else
         setOverlayColor(self.buttonSet.overlays.overlayConfig, 1, 1, 1, 1);
       end;
-	  local iconHeight = .8 * guiElementHeight;
-	  local iconWidth = iconHeight / g_screenAspectRatio;
-	  local offsetIcon = guiElementHeight * 0.1;
+      local iconHeight = .6 * baseHeight;
+      local iconWidth = iconHeight / g_screenAspectRatio;
+      local offsetIcon = baseHeight * 0.2;
       renderOverlay(self.buttonSet.overlays.overlayConfig, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
       if not self.buttonSet.button2IsActive then
         setOverlayColor(self.buttonSet.overlays.overlayClose, 1, 1, 1, 0);
@@ -324,12 +306,21 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           end;
         end;
       end;
-    elseif self.style == "toggle" or self.style == "toggleSound" or self.style == "toggleModul" then
+    elseif self.style == "toggle" then
       if isDown and button == 1 then
         if (grid.table[self.gridPos].x + grid.centerX + self.buttonSet.areas.toggle.xMax) > posX
          and (grid.table[self.gridPos].x + grid.centerX + self.buttonSet.areas.toggle.xMin) < posX
          and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMax) > posY
          and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMin < posY) then
+          SowingSupp:modules(grid, vehicle, self);
+        end;
+      end;
+    elseif self.style == "option" then
+      if isDown and button == 1 then
+        if (grid.table[self.gridPos].x + self.buttonSet.areas.toggle.xMax) > posX
+          and (grid.table[self.gridPos].x + self.buttonSet.areas.toggle.xMin) < posX
+          and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMax) > posY
+          and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMin < posY) then
           SowingSupp:modules(grid, vehicle, self);
         end;
       end;
@@ -358,9 +349,9 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           end;
         end;
         if self.buttonSet.button2IsActive then
-					local guiElementHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
-					local iconWidth = .8 * guiElementHeight / g_screenAspectRatio;
-					local offsetIcon = guiElementHeight * 0.1;
+					local baseHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
+					local iconWidth = .8 * baseHeight / g_screenAspectRatio;
+					local offsetIcon = baseHeight * 0.1;
           if (grid.table[self.gridPos].x + grid.rightX - offsetIcon - iconWidth + self.buttonSet.areas.titleBar.xMax) > posX
           and (grid.table[self.gridPos].x + grid.rightX - offsetIcon - iconWidth + self.buttonSet.areas.titleBar.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBar.yMax) > posY
