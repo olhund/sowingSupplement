@@ -176,7 +176,7 @@ function SowingSupp:update(dt)
 	end;
 end;
 
-function SowingMachine:onAttach(attacherVehicle)
+function SowingSupp:onAttach(attacherVehicle)
 	--self.AttacherVehicleBackup = attacherVehicle;
 	-- can we use this for the part in updateTick??
 end;
