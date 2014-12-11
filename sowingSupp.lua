@@ -176,6 +176,11 @@ function SowingSupp:update(dt)
 	end;
 end;
 
+function SowingMachine:onAttach(attacherVehicle)
+	--self.AttacherVehicleBackup = attacherVehicle;
+	-- can we use this for the part in updateTick??
+end;
+
 function SowingSupp:updateTick(dt)
 	-- update y-position if HUD is on initial position (exact x-position) and there are other HUDs (like ThreshingCounter or OperatingHours of AGes Sonnenschein)
 	if self:getIsActive() and self.sosuHUDisActive then
@@ -188,9 +193,8 @@ function SowingSupp:updateTick(dt)
 			self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs = 0;
 		end;
 		if self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs ~= self.lastNumActiveHUDs and self.hud1.baseX == g_currentMission.hudSelectionBackgroundOverlay.x then
-			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height*(self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) +
-	g_currentMission.hudSelectionBackgroundOverlay.height*.038 + g_currentMission.hudBackgroundOverlay.height;
-
+			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height * (self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) + g_currentMission.hudSelectionBackgroundOverlay.height * .038 + g_currentMission.hudBackgroundOverlay.height;
+			self.hud1:changeContainer(self.hud1.baseX, yPos);
 			self.lastNumActiveHUDs = self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs;
 		end;
 	end;

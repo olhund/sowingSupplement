@@ -378,7 +378,6 @@ function SowingSupp.guiElement:mouseEvent(grid, container, vehicle, posX, posY, 
         if container.move then
           container.move = false;
           dlHudchangedJet = true;
-					--container:changeContainer(math.min(posX,g_currentMission.hudSelectionBackgroundOverlay.x), math.min(posY, 1 - (grid.rows * grid.height)))
         end;
         if not dlHudchangedJet then
           if (grid.table[self.gridPos].x + grid.rightX - self.buttonSet.areas.titleBarMove.xMax) > posX

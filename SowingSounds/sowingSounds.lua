@@ -1,6 +1,6 @@
 --
 --	SowingSounds
---	Sounds for Sowing Machines (acoustic signals) 
+--	Sounds for Sowing Machines (acoustic signals)
 --
 -- @author:  	GreenEye and gotchTOM
 -- @date:			6-Dec-2014
@@ -30,23 +30,23 @@ function SowingSounds:load(xmlFile)
 	self.sowingSounds.isAllowed = true;
 	self.sowingSounds.checkOnLeave = false;
 	self.soMaHasGroundContact = false;
-	
-	local SeSoSoundFile1 = Utils.getFilename("lower.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");	
+
+	local SeSoSoundFile1 = Utils.getFilename("lower.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");
     self.SeSoSoundId1 = createSample("SeSoSound1");
     loadSample(self.SeSoSoundId1, SeSoSoundFile1, false);
 
-	local SeSoSoundFile2 = Utils.getFilename("raised.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");	
+	local SeSoSoundFile2 = Utils.getFilename("raised.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");
     self.SeSoSoundId2 = createSample("SeSoSound2");
     loadSample(self.SeSoSoundId2, SeSoSoundFile2, false);
 
-	local SeSoSoundFile3 = Utils.getFilename("line.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");	
+	local SeSoSoundFile3 = Utils.getFilename("line.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");
     self.SeSoSoundId3 = createSample("SeSoSound3");
     loadSample(self.SeSoSoundId3, SeSoSoundFile3, false);
 
-	local SeSoSoundFile4 = Utils.getFilename("empty.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");	
+	local SeSoSoundFile4 = Utils.getFilename("empty.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");
     self.SeSoSoundId4 = createSample("SeSoSound4");
     loadSample(self.SeSoSoundId4, SeSoSoundFile4, false);
-	
+
 	self:updateSoSoGUI();
 end;
 
@@ -58,11 +58,11 @@ function SowingSounds:delete()
 		end;
 		if self.sowingSounds.isLineActive then
 			stopSample(self.SeSoSoundId3);
-		end;	
+		end;
 		if self.sowingSounds.isSeedEmpty then
 			stopSample(self.SeSoSoundId4);
-		end;		
-	end;	
+		end;
+	end;
 end;
 
 function SowingSounds:mouseEvent(posX, posY, isDown, isUp, button)
@@ -72,14 +72,14 @@ function SowingSounds:keyEvent(unicode, sym, modifier, isDown)
 end;
 
 function SowingSounds:getSaveAttributesAndNodes(nodeIdent)
-	local attributes = 'sowingSoundIsActiv="' .. tostring(self.activeModules.sowingSounds) ..'"'; 
+	local attributes = 'sowingSoundIsActiv="' .. tostring(self.activeModules.sowingSounds) ..'"';
 	-- print("!!!!!!!!!!!!!!SowingSounds:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
 	return attributes;
 end;
 
 function SowingSounds:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
-	
-	if self.activeModules ~= nil and self.activeModules.sowingSounds and not resetVehicles then 
+
+	if self.activeModules ~= nil and self.activeModules.sowingSounds and not resetVehicles then
 		self.activeModules.sowingSounds = Utils.getNoNil(getXMLBool(xmlFile, key .. "#sowingSoundIsActiv"), self.activeModules.sowingSounds);
 		self:updateSoSoGUI();
 		-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes_sowingSoundIsActiv = "..tostring(self.activeModules.sowingSounds))
@@ -104,7 +104,7 @@ function SowingSounds:updateTick(dt)
 			if not self.sowingSounds.checkOnLeave then
 				self.sowingSounds.checkOnLeave = true;
 			end;
-			if self.isTurnedOn then	
+			if self.isTurnedOn then
 				self.soMaHasGroundContact = self.groundReferenceNodes[1].isActive;
 				if not self.sowingSounds.isLowered then
 					if self.soMaHasGroundContact then
@@ -112,12 +112,12 @@ function SowingSounds:updateTick(dt)
 						-- print("playSample(self.lower, 1, 1, 0);")
 						self.sowingSounds.isLowered = true;
 					end;
-				else		
+				else
 					if not self.soMaHasGroundContact then
 						self.sowingSounds.isLowered = false;
 					end;
 				end;
-				
+
 				if not self.sowingSounds.isRaised then
 					if not self.soMaHasGroundContact then
 						playSample(self.SeSoSoundId2, 0, 1, 0);
@@ -152,10 +152,10 @@ function SowingSounds:updateTick(dt)
 						self.sowingSounds.isSeedLow5Percent = true;
 					end;
 				else
-					if self.fillLevel > 0.05 * self.capacity then 
+					if self.fillLevel > 0.05 * self.capacity then
 						self.sowingSounds.isSeedLow5Percent = false;
 					end;
-				end;		
+				end;
 
 				if not self.sowingSounds.isSeedLow1Percent then
 					if self.fillLevel <= 0.01 * self.capacity then
@@ -164,11 +164,11 @@ function SowingSounds:updateTick(dt)
 						self.sowingSounds.isSeedLow1Percent = true;
 					end;
 				else
-					if self.fillLevel > 0.01 * self.capacity then 
+					if self.fillLevel > 0.01 * self.capacity then
 						self.sowingSounds.isSeedLow1Percent = false;
 					end;
-				end;		
-			
+				end;
+
 				if not self.sowingSounds.isSeedEmpty then
 					if self.fillLevel == 0 then
 						playSample(self.SeSoSoundId4, 0, 1, 0);
@@ -185,15 +185,15 @@ function SowingSounds:updateTick(dt)
 			else								--> Deaktivieren beim Abschalten
 				if self.sowingSounds.isRaised then
 					self.sowingSounds.isRaised = false;
-					stopSample(self.SeSoSoundId2);	
+					stopSample(self.SeSoSoundId2);
 					-- print("stopSample(self.raised);")
 				end;
 				if self.sowingSounds.isLineActive then
 					self.sowingSounds.isLineActive = false;
 					stopSample(self.SeSoSoundId3);
 					-- print("stopSample(self.line);")
-				end;	
-				if self.sowingSounds.isSeedEmpty then	
+				end;
+				if self.sowingSounds.isSeedEmpty then
 					self.sowingSounds.isSeedEmpty = false;
 					stopSample(self.SeSoSoundId4);
 					-- print("stopSample(self.empty);")
@@ -202,15 +202,15 @@ function SowingSounds:updateTick(dt)
 		else										--> Deaktivieren beim Verbieten des Sounds
 			if self.sowingSounds.isRaised then
 				self.sowingSounds.isRaised = false;
-				stopSample(self.SeSoSoundId2);	
+				stopSample(self.SeSoSoundId2);
 				-- print("stopSample(self.raised);")
 			end;
 			if self.sowingSounds.isLineActive then
 				self.sowingSounds.isLineActive = false;
 				stopSample(self.SeSoSoundId3);
 				-- print("stopSample(self.line);")
-			end;	
-			if self.sowingSounds.isSeedEmpty then	
+			end;
+			if self.sowingSounds.isSeedEmpty then
 				self.sowingSounds.isSeedEmpty = false;
 				stopSample(self.SeSoSoundId4);
 				-- print("stopSample(self.empty);")
@@ -220,15 +220,15 @@ function SowingSounds:updateTick(dt)
 		if self.sowingSounds ~= nil and self.sowingSounds.checkOnLeave then
 			if self.sowingSounds.isRaised then
 				self.sowingSounds.isRaised = false;
-				stopSample(self.SeSoSoundId2);	
+				stopSample(self.SeSoSoundId2);
 				-- print("stopSample(self.raised);")
 			end;
 			if self.sowingSounds.isLineActive then
 				self.sowingSounds.isLineActive = false;
 				stopSample(self.SeSoSoundId3);
 					-- print("stopSample(self.line);")
-			end;	
-			if self.sowingSounds.isSeedEmpty then	
+			end;
+			if self.sowingSounds.isSeedEmpty then
 				self.sowingSounds.isSeedEmpty = false;
 				stopSample(self.SeSoSoundId4);
 				-- print("stopSample(self.empty);")
@@ -244,10 +244,10 @@ end;
 function SowingSounds:updateSoSoGUI()
 	if self.activeModules ~= nil then
 		if self.activeModules.sowingSounds then
-			self.grid1.elements.sowingSound.value = self.sowingSounds.isAllowed;
-			self.grid1.elements.sowingSound.isVisible = true;		
+			self.hud1.grids.main.elements.sowingSound.value = self.sowingSounds.isAllowed;
+			self.hud1.grids.main.elements.sowingSound.isVisible = true;
 		else
-			self.grid1.elements.sowingSound.isVisible = false;
+			self.hud1.grids.main.elements.sowingSound.isVisible = false;
 		end;
 	end;
 end;
