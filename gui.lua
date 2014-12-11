@@ -1,13 +1,36 @@
+-- Create a countainer for postitioning of multiple "windows"
+SowingSupp.container = {};
+function SowingSupp.container:New(baseX, baseY, isVisible)
+  local obj = setmetatable ( { }, { __index = self } )
+  -- baseX / baseY = start of all other positioning
+  obj.baseX = baseX;
+  obj.baseY = baseY;
+  obj.height = 0;
+  obj.width = 0;
+  obj.move = false;
+  obj.isVisible = isVisible;
+  obj.grids = {};
+  return obj;
+end;
+
+function SowingSupp.container:changeContainer(baseX, baseY)
+  self.baseX = baseX;
+  self.baseY = baseY;
+  for k, grid in pairs(self.grids) do
+    grid:changeGrid(self);
+  end;
+end;
+
 -- Create a grid for easy positioning of guiElements
 SowingSupp.hudGrid = {};
-function SowingSupp.hudGrid:New(baseX, baseY, rows, columns, width, height, isVisible)
+function SowingSupp.hudGrid:New(container, offsetX, offsetY, rows, columns, width, height, isVisible, isMaster)
   local obj = setmetatable ( { }, { __index = self } )
   -- Create background Overlay
   obj.hudBgOverlay = createImageOverlay(Utils.getFilename("img/hud_bg.dds", SowingSupp.path));
 
-  -- baseX / baseY = start of all other positioning
-  obj.baseX = baseX;
-  obj.baseY = baseY;
+  -- offsetX / offsetY = offset from container baseX / baseY
+  obj.offsetX = offsetX;
+  obj.offsetY = offsetY;
   obj.rows = rows;
   obj.columns = columns;
   obj.width = width;
@@ -15,35 +38,41 @@ function SowingSupp.hudGrid:New(baseX, baseY, rows, columns, width, height, isVi
   obj.isVisible = isVisible;
   obj.centerX = obj.width/2;
   obj.rightX = obj.width * obj.columns;
+  obj.isMaster = isMaster;
+  if obj.isMaster then
+    container.height = obj.rows * obj.height;
+    container.width = obj.columns * obj.width;
+  end;
   obj.move = false;
+  obj.elements = {};
   obj.table = {};
   for i=1, (obj.rows * obj.columns) do
     obj.table[i] = {};
   end;
 
-  self.offsetY = 0;
+  self.tempOffsetY = 0;
   local count = 1;
   for row=1, obj.rows do
     local offsetX = 0;
     for column=1, obj.columns do
-      obj.table[count].x = obj.baseX + offsetX;
-      obj.table[count].y = obj.baseY + self.offsetY;
+      obj.table[count].x = container.baseX + obj.offsetX + offsetX;
+      obj.table[count].y = container.baseY + obj.offsetY + self.tempOffsetY;
       offsetX = offsetX + obj.width;
       count = count + 1;
     end;
-    self.offsetY = self.offsetY + obj.height;
+    self.tempOffsetY = self.tempOffsetY + obj.height;
   end;
 
   return obj;
 end;
 
 -- Update grid
-function SowingSupp.hudGrid:changeGrid( baseX, baseY, rows, columns, width, height, isVisible)
+function SowingSupp.hudGrid:changeGrid( container, offsetX, offsetY, rows, columns, width, height, isVisible)
   for k,v in pairs(self.table) do self.table[k]=nil end
 
   -- baseX / baseY = start of all other positioning
-  self.baseX = baseX or self.baseX;
-  self.baseY = baseY or self.baseY;
+  self.offsetX = offsetX or self.offsetX;
+  self.offsetY = offsetY or self.offsetY;
   self.rows = rows or self.rows;
   self.columns = columns or self.columns;
   self.width = width or self.width;
@@ -51,24 +80,28 @@ function SowingSupp.hudGrid:changeGrid( baseX, baseY, rows, columns, width, heig
   self.isVisible = isVisible or self.isVisible;
   self.centerX = self.width/2;
   self.rightX = self.width * self.columns;
+  if self.isMaster then
+    container.height = self.rows * self.height;
+    container.width = self.columns * self.width;
+  end;
   self.table = {};
   for i=1, (self.rows * self.columns) do
     self.table[i] = {};
   end;
 
-  self.offsetY = 0;
+  self.tempOffsetY = 0;
   local count = 1;
   for row=1, self.rows do
     local offsetX = 0;
     for column=1, self.columns do
-      self.table[count].x = self.baseX + offsetX;
-      self.table[count].y = self.baseY + self.offsetY;
+      self.table[count].x = container.baseX + self.offsetX + offsetX;
+      self.table[count].y = container.baseY + self.offsetY + self.tempOffsetY;
       offsetX = offsetX + self.width;
       count = count + 1;
     end;
-    self.offsetY = self.offsetY + self.height;
+    self.tempOffsetY = self.tempOffsetY + self.height;
   end;
-    --return self;
+
 end;
 
 
@@ -169,17 +202,26 @@ function SowingSupp.buttonSet:New ( functionToCall, style, gridPos, graphic )
 end;
 
 --Render
-function SowingSupp.hudGrid:render()
+function SowingSupp.container:render()
   if self.isVisible then
-    renderOverlay(self.hudBgOverlay, self.baseX, self.baseY, (self.columns * self.width), (self.rows * self.height));
-    -- Render all guiElements with own render()
-    for k, guiElement in pairs(self.elements) do
-      guiElement:render(self);
+    -- Render all grids with own render()
+    for k, grid in pairs(self.grids) do
+      grid:render(self);
     end;
   end;
 end;
 
-function SowingSupp.guiElement:render(grid)
+function SowingSupp.hudGrid:render(container)
+  if self.isVisible then
+    renderOverlay(self.hudBgOverlay, container.baseX + self.offsetX, container.baseY + self.offsetY, (self.columns * self.width), (self.rows * self.height));
+    -- Render all guiElements with own render()
+    for k, guiElement in pairs(self.elements) do
+      guiElement:render(self, container);
+    end;
+  end;
+end;
+
+function SowingSupp.guiElement:render(grid, container)
   if self.isVisible then
     setTextColor(1,1,1,1);
     setTextBold(false);
@@ -243,7 +285,7 @@ function SowingSupp.guiElement:render(grid)
       local offsetSep = baseHeight * 0.1;
       --renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetSep, grid.table[self.gridPos].y, sepWidth - offsetSep, 0.01);
       setOverlayColor(self.graphic, 1, 1, 1, 0.25);
-      renderOverlay(self.graphic, grid.baseX + offsetSep, grid.table[self.gridPos].y, grid.columns * grid.width - (2*offsetSep), 0.001);
+      renderOverlay(self.graphic, container.baseX + grid.offsetX + offsetSep, grid.table[self.gridPos].y, grid.columns * grid.width - (2*offsetSep), 0.001);
 
     elseif self.style == "titleBar" then
       setOverlayColor(self.buttonSet.overlays.overlayRowBg, .01, .01, .01, 1);
@@ -271,20 +313,27 @@ function SowingSupp.guiElement:render(grid)
 end;
 
 --Mouse Events
-function SowingSupp.hudGrid:mouseEvent(vehicle, posX, posY, isDown, isUp, button)
+function SowingSupp.container:mouseEvent(vehicle, posX, posY, isDown, isUp, button)
   if self.isVisible then
     if self.move then
-	  --
-      self:changeGrid(math.min(posX,g_currentMission.hudSelectionBackgroundOverlay.x), math.min(posY, 1 - (self.rows * self.height)));
+      self:changeContainer(math.min(posX,g_currentMission.hudSelectionBackgroundOverlay.x), math.min(posY, 1 - self.height));
     end;
+    for k, grid in pairs(self.grids) do
+      grid:mouseEvent(self, vehicle, posX, posY, isDown, isUp, button);
+    end;
+  end;
+end;
+
+function SowingSupp.hudGrid:mouseEvent(container, vehicle, posX, posY, isDown, isUp, button)
+  if self.isVisible then
     for k, guiElement in pairs(self.elements) do
-      guiElement:mouseEvent(self, vehicle, posX, posY, isDown, isUp, button);
+      guiElement:mouseEvent(self, container, vehicle, posX, posY, isDown, isUp, button);
     end;
   end;
 end;
 
 -- Create mouseEvents & call functions
-function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isUp, button)
+function SowingSupp.guiElement:mouseEvent(grid, container, vehicle, posX, posY, isDown, isUp, button)
   if self.isVisible then
     local dlHudchangedJet = false;
     if self.style == "plusminus" or self.style == "arrow" then
@@ -294,7 +343,7 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           and (grid.table[self.gridPos].x + grid.centerX + self.buttonSet.areas.minus.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.minus.yMax) > posY
           and (grid.table[self.gridPos].y + self.buttonSet.areas.minus.yMin) < posY then
-            SowingSupp:modules(grid, vehicle, self, self.parameter1);
+            SowingSupp:modules(grid, container, vehicle, self, self.parameter1);
           end;
         end;
         if self.buttonSet.button2IsActive then
@@ -302,7 +351,7 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           and (grid.table[self.gridPos].x + grid.centerX + self.buttonSet.areas.plus.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.plus.yMax) > posY
           and (grid.table[self.gridPos].y + self.buttonSet.areas.plus.yMin) < posY then
-            SowingSupp:modules(grid, vehicle, self, self.parameter2);
+            SowingSupp:modules(grid, container, vehicle, self, self.parameter2);
           end;
         end;
       end;
@@ -312,7 +361,7 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
          and (grid.table[self.gridPos].x + grid.centerX + self.buttonSet.areas.toggle.xMin) < posX
          and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMax) > posY
          and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMin < posY) then
-          SowingSupp:modules(grid, vehicle, self);
+          SowingSupp:modules(grid, container, vehicle, self);
         end;
       end;
     elseif self.style == "option" then
@@ -321,23 +370,22 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           and (grid.table[self.gridPos].x + self.buttonSet.areas.toggle.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMax) > posY
           and (grid.table[self.gridPos].y + self.buttonSet.areas.toggle.yMin < posY) then
-          SowingSupp:modules(grid, vehicle, self);
+          SowingSupp:modules(grid, container, vehicle, self);
         end;
       end;
     elseif self.style == "titleBar" then
       if isDown and button == 1 then
-        if grid.move then
-          grid.move = false;
+        if container.move then
+          container.move = false;
           dlHudchangedJet = true;
-					vehicle:updateGrids(math.min(posX,g_currentMission.hudSelectionBackgroundOverlay.x), math.min(posY, 1 - (grid.rows * grid.height)))
+					--container:changeContainer(math.min(posX,g_currentMission.hudSelectionBackgroundOverlay.x), math.min(posY, 1 - (grid.rows * grid.height)))
         end;
         if not dlHudchangedJet then
           if (grid.table[self.gridPos].x + grid.rightX - self.buttonSet.areas.titleBarMove.xMax) > posX
           and (grid.table[self.gridPos].x + self.buttonSet.areas.titleBarMove.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBarMove.yMax) > posY
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBarMove.yMin) < posY then
-            grid.move = true;
-						vehicle.grid2.isVisible = false;
+            container.move = true;
           end;
         end;
         if self.buttonSet.button1IsActive then
@@ -345,7 +393,7 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           and (grid.table[self.gridPos].x + self.buttonSet.areas.titleBar.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBar.yMax) > posY
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBar.yMin) < posY then
-            SowingSupp:modules(grid, vehicle, self, self.parameter1);
+            SowingSupp:modules(grid, container, vehicle, self, self.parameter1);
           end;
         end;
         if self.buttonSet.button2IsActive then
@@ -356,7 +404,7 @@ function SowingSupp.guiElement:mouseEvent(grid, vehicle, posX, posY, isDown, isU
           and (grid.table[self.gridPos].x + grid.rightX - offsetIcon - iconWidth + self.buttonSet.areas.titleBar.xMin) < posX
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBar.yMax) > posY
           and (grid.table[self.gridPos].y + self.buttonSet.areas.titleBar.yMin) < posY then
-            SowingSupp:modules(grid, vehicle, self, self.parameter2);
+            SowingSupp:modules(grid, container, vehicle, self, self.parameter2);
           end;
         end;
       end;

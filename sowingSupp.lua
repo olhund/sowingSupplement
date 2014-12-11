@@ -37,7 +37,7 @@ function SowingSupp:load(xmlFile)
 			SowingSupp:loadConfigFile(self);
 		end;
 
-		print("SowingSupp:load - check:")
+		print("SowingSupp: load - check:")
 		for name,value in pairs(self.activeModules) do
 			print(name," ",tostring(value))
 		end;
@@ -49,12 +49,33 @@ function SowingSupp:load(xmlFile)
 	SowingSupp.snd_click = createSample("snd_click");
 	loadSample(SowingSupp.snd_click, Utils.getFilename("snd/snd_click.wav", SowingSupp.path), false);
 
-	-- create grids in function updateGrids(), so grids can be updated if other HUDs are on start-position and grid2 is updated if grid1 was moved
-	self.updateGrids = SpecializationUtil.callSpecializationsFunction("updateGrids");
 	local xPos, yPos = g_currentMission.hudSelectionBackgroundOverlay.x, g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height + g_currentMission.hudBackgroundOverlay.height;
-	self:updateGrids(xPos, yPos);
 
+	self.hud1 = {};
+	self.hud1 = SowingSupp.container:New(xPos, yPos, true);
 
+	local gridWidth = g_currentMission.hudSelectionBackgroundOverlay.width/3;
+	local gridHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
+
+	-- create grid (container [table], offset x [int], offset y [int], rows [int], columns [int], width [int], height [int] is visible [bool], is master [bool])
+	self.hud1.grids.main = {};
+	self.hud1.grids.main = SowingSupp.hudGrid:New(self.hud1, 0, 0, 9, 3, gridWidth, gridHeight, true, true);
+
+	self.hud1.grids.config = {};
+	self.hud1.grids.config = SowingSupp.hudGrid:New(self.hud1, -self.hud1.width - (gridHeight*.038), 0, 8, 3, gridWidth, gridHeight, false, false);
+
+	-- create gui elements ( grid position [int], function to call [string], parameter1, parameter2, style [string], label [string], value [], is visible [bool], [Grafik], textSize [float])
+	self.hud1.grids.main.elements.titleBar = SowingSupp.guiElement:New( 25, "titleBar", "configHud", "close", "titleBar", "Sowing Supplement", nil, true, nil, g_currentMission.missionStatusTextSize*0.8);
+	self.hud1.grids.main.elements.sowingSound = SowingSupp.guiElement:New( 3, "toggleSound", nil, nil, "toggle", "Sounds", true, self.activeModules.sowingSounds, "button_Sound", g_currentMission.cruiseControlTextSize);
+	self.hud1.grids.main.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "info", nil, "0.00ha   (0.0ha/h)", self.activeModules.sowingCounter, "SowingCounter_sessionHUD", g_currentMission.fillLevelTextSize);
+	self.hud1.grids.main.elements.scTotal = SowingSupp.guiElement:New( 4, nil, nil, nil, "info", nil, "0.0ha", self.activeModules.sowingCounter, "SowingCounter_totalHUD", g_currentMission.fillLevelTextSize);
+
+	-- self.hud1.grids.main.elements.dlMode = SowingSupp.guiElement:New( 19, "changeMode", -1, 1, "arrow", "Mode", "AUTO", true, nil);
+	-- self.hud1.grids.main.elements.changeSomething = SowingSupp.guiElement:New( 20, "changeSomething", -3, 1, "plusminus", "Verschieben", 21, true, nil);
+
+	self.hud1.grids.config.elements.soCoModul = SowingSupp.guiElement:New( 1, "toggleSoCoModul", nil, nil, "option", SowingMachine.SowingCounter, self.activeModules.sowingCounter, true, "button_Option", g_currentMission.fillLevelTextSize);
+	self.hud1.grids.config.elements.soSoModul = SowingSupp.guiElement:New( 4, "toggleSoSoModul", nil, nil, "option", SowingMachine.SowingSounds, self.activeModules.sowingSounds, true, "button_Option", g_currentMission.fillLevelTextSize);
+	self.hud1.grids.config.elements.separator1 = SowingSupp.guiElement:New( 4, nil, nil, nil, "separator", nil, nil, true, "row_bg", nil);
 end;
 
 function SowingSupp:checkIsDedi()
@@ -66,15 +87,15 @@ function SowingSupp:delete()
 end;
 
 function SowingSupp:mouseEvent(posX, posY, isDown, isUp, button)
-	self.grid1:mouseEvent(self, posX, posY, isDown, isUp, button);
-	self.grid2:mouseEvent(self, posX, posY, isDown, isUp, button);
+	self.hud1:mouseEvent(self, posX, posY, isDown, isUp, button);
+	--self.hud1.grids.config:mouseEvent(self, posX, posY, isDown, isUp, button);
 end;
 
 function SowingSupp:keyEvent(unicode, sym, modifier, isDown)
 
 end;
 
-function SowingSupp:modules(grid, vehicle, guiElement, parameter)
+function SowingSupp:modules(grid, container, vehicle, guiElement, parameter)
 	playSample(SowingSupp.snd_click, 1, 1, 0);
 	-- Call other functions instead of doing it directly
 	if guiElement.functionToCall == "changeMode" then
@@ -108,7 +129,7 @@ function SowingSupp:modules(grid, vehicle, guiElement, parameter)
 	end;
 	if guiElement.functionToCall == "titleBar" then
 		if parameter == "configHud" then
-			vehicle.grid2.isVisible = not vehicle.grid2.isVisible;
+			vehicle.hud1.grids.config.isVisible = not vehicle.hud1.grids.config.isVisible;
 		end;
 		if parameter == "close" then
 			vehicle.sosuHUDisActive = false;
@@ -138,7 +159,7 @@ function SowingSupp:update(dt)
 		if InputBinding.hasEvent(InputBinding.SOWINGSUPP_HUD) then
 			self.sosuHUDisActive = not self.sosuHUDisActive;
 			if self.sosuHUDisActive then
-				self.grid1.isVisible = true;
+				self.hud1.isVisible = true;
 			end;
 		end;
 		if InputBinding.isPressed(InputBinding.SOWINGSUPP_MOUSE) and self.sosuHUDisActive then
@@ -166,11 +187,9 @@ function SowingSupp:updateTick(dt)
 			self.AttacherVehicleBackup.ActiveHUDs = {};
 			self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs = 0;
 		end;
-		if self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs ~= self.lastNumActiveHUDs and self.grid1.baseX == g_currentMission.hudSelectionBackgroundOverlay.x then
+		if self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs ~= self.lastNumActiveHUDs and self.hud1.baseX == g_currentMission.hudSelectionBackgroundOverlay.x then
 			local yPos = g_currentMission.hudSelectionBackgroundOverlay.y + g_currentMission.hudSelectionBackgroundOverlay.height*(self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs+1) +
 	g_currentMission.hudSelectionBackgroundOverlay.height*.038 + g_currentMission.hudBackgroundOverlay.height;
-
-			self:updateGrids(self.grid1.baseX, yPos);
 
 			self.lastNumActiveHUDs = self.AttacherVehicleBackup.ActiveHUDs.numActiveHUDs;
 		end;
@@ -182,8 +201,7 @@ function SowingSupp:draw()
 		InputBinding.setShowMouseCursor(true);
 	end;
 	if self.sosuHUDisActive then
-		self.grid1:render();
-		self.grid2:render();
+		self.hud1:render();
 		g_currentMission:addHelpButtonText(SowingMachine.SOWINGSUPP_HUDoff, InputBinding.SOWINGSUPP_HUD);
 	else
 		g_currentMission:addHelpButtonText(SowingMachine.SOWINGSUPP_HUDon, InputBinding.SOWINGSUPP_HUD);
@@ -226,36 +244,4 @@ function SowingSupp:loadConfigFile(self)
 	end;
 
 	saveXMLFile(Xml);
-end;
-
-function SowingSupp:updateGrids(xPos, yPos)
-
-	local gridWidth = g_currentMission.hudSelectionBackgroundOverlay.width/3;
-	local gridHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
-
-	self.grid1 = {};
-	self.grid1 = SowingSupp.hudGrid:New(xPos, yPos, 9, 3, gridWidth, gridHeight, true);
-
-	self.grid2 = {};
-	self.grid2 = SowingSupp.hudGrid:New(self.grid1.baseX - g_currentMission.hudSelectionBackgroundOverlay.width - gridHeight*.038, self.grid1.baseY, 8, 3, gridWidth, gridHeight, false);
-
-
-	self.grid1.elements = {};
-	-- create gui elements ( grid position [int], function to call [string], parameter1, parameter2, style [string], label [string], value [], is visible [bool], [Grafik], textSize [float])
-	self.grid1.elements.titleBar = SowingSupp.guiElement:New( 25, "titleBar", "configHud", "close", "titleBar", "Sowing Supplement", nil, true, nil, g_currentMission.missionStatusTextSize*0.8);
-		self.grid1.elements.sowingSound = SowingSupp.guiElement:New( 3, "toggleSound", nil, nil, "toggle", "Sounds", true, self.activeModules.sowingSounds, "button_Sound", g_currentMission.cruiseControlTextSize);
-	self.grid1.elements.scSession = SowingSupp.guiElement:New( 1, nil, nil, nil, "info", nil, "0.00ha   (0.0ha/h)", self.activeModules.sowingCounter, "SowingCounter_sessionHUD", g_currentMission.fillLevelTextSize);
-		self.grid1.elements.scTotal = SowingSupp.guiElement:New( 4, nil, nil, nil, "info", nil, "0.0ha", self.activeModules.sowingCounter, "SowingCounter_totalHUD", g_currentMission.fillLevelTextSize);
-
-	-- self.grid1.elements.dlMode = SowingSupp.guiElement:New( 19, "changeMode", -1, 1, "arrow", "Mode", "AUTO", true, nil);
-	-- self.grid1.elements.changeSomething = SowingSupp.guiElement:New( 20, "changeSomething", -3, 1, "plusminus", "Verschieben", 21, true, nil);
-
-
-	self.grid2.elements = {};
-	-- create gui elements (grid position [int], function to call [string], parameter1, parameter2, style [string], label [string], value [], is visible [bool], [Grafik], textSize [float])
-	self.grid2.elements.soCoModul = SowingSupp.guiElement:New( 1, "toggleSoCoModul", nil, nil, "option", SowingMachine.SowingCounter, self.activeModules.sowingCounter, true, "button_Option", g_currentMission.fillLevelTextSize);
-	self.grid2.elements.soSoModul = SowingSupp.guiElement:New( 4, "toggleSoSoModul", nil, nil, "option", SowingMachine.SowingSounds, self.activeModules.sowingSounds, true, "button_Option", g_currentMission.fillLevelTextSize);
-	self.grid2.elements.separator1 = SowingSupp.guiElement:New( 4, nil, nil, nil, "separator", nil, nil, true, "row_bg", nil);
-
-
 end;
