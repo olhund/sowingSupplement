@@ -3,15 +3,14 @@
 --	Sounds for Sowing Machines (acoustic signals)
 --
 -- @author:  	GreenEye and gotchTOM
--- @date:			6-Dec-2014
--- @version:	v0.5
--- @history:	v0.1 - initial implementation
---						v0.5 - part of SowingSupplement
+-- @date:			21-Dec-2014
+-- @version:	v0.7
 --
 -- free for noncommerical-usage
 --
 
 SowingSounds = {};
+-- local mod_directory = g_currentModDirectory;
 
 function SowingSounds.prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(SowingMachine, specializations);
@@ -29,7 +28,6 @@ function SowingSounds:load(xmlFile)
 	self.sowingSounds.isSeedEmpty = false;
 	self.sowingSounds.isAllowed = true;
 	self.sowingSounds.checkOnLeave = false;
-	self.soMaHasGroundContact = false;
 
 	local SeSoSoundFile1 = Utils.getFilename("lower.wav", g_modsDirectory.."/ZZZ_sowingSupp/SowingSounds/");
     self.SeSoSoundId1 = createSample("SeSoSound1");
@@ -73,17 +71,15 @@ end;
 
 function SowingSounds:getSaveAttributesAndNodes(nodeIdent)
 	local attributes = 'sowingSoundIsActiv="' .. tostring(self.activeModules.sowingSounds) ..'"';
-	-- print("!!!!!!!!!!!!!!SowingSounds:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
+	--print("!!!!!!!!!!!!!!SowingSounds:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
 	return attributes;
 end;
 
 function SowingSounds:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
-
 	if self.activeModules ~= nil and self.activeModules.sowingSounds and not resetVehicles then
 		self.activeModules.sowingSounds = Utils.getNoNil(getXMLBool(xmlFile, key .. "#sowingSoundIsActiv"), self.activeModules.sowingSounds);
 		self:updateSoSoGUI();
-		-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes_sowingSoundIsActiv = "..tostring(self.activeModules.sowingSounds))
-		-- print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes -> self:updateSoSoGUI()")
+		--print("!!!!!!!!!!!!!!SowingSounds:loadFromAttributesAndNodes_sowingSoundIsActiv = "..tostring(self.activeModules.sowingSounds))
 	end;
     return BaseMission.VEHICLE_LOAD_OK;
 end
@@ -95,7 +91,7 @@ function SowingSounds:updateTick(dt)
 
 	if self:getIsActive() then
 		if self.activeModules ~= nil and self.activeModules.sowingSounds and self.sowingSounds ~= nil and self.sowingSounds.isAllowed and self:getIsActiveForSound() then
-			-- renderText(0.1,0.3,0.02,"self.soMaHasGroundContact: "..tostring(self.soMaHasGroundContact))
+			-- renderText(0.1,0.3,0.02,"self.soMaIsLowered: "..tostring(self.soMaIsLowered))
 			-- renderText(0.1,0.32,0.02,"self.isTurnedOn: "..tostring(self.isTurnedOn))
 			-- renderText(0.1,0.34,0.02,"self.sowingSounds.isLowered: "..tostring(self.sowingSounds.isLowered))
 			-- renderText(0.1,0.36,0.02,"self.sowingSounds.isSeedLow5Percent: "..tostring(self.sowingSounds.isSeedLow5Percent))
@@ -105,43 +101,42 @@ function SowingSounds:updateTick(dt)
 				self.sowingSounds.checkOnLeave = true;
 			end;
 			if self.isTurnedOn then
-				self.soMaHasGroundContact = self.groundReferenceNodes[1].isActive;
 				if not self.sowingSounds.isLowered then
-					if self.soMaHasGroundContact then
+					if self.soMaIsLowered then
 						playSample(self.SeSoSoundId1, 1, 1, 0);
 						-- print("playSample(self.lower, 1, 1, 0);")
 						self.sowingSounds.isLowered = true;
 					end;
 				else
-					if not self.soMaHasGroundContact then
+					if not self.soMaIsLowered then
 						self.sowingSounds.isLowered = false;
 					end;
 				end;
 
 				if not self.sowingSounds.isRaised then
-					if not self.soMaHasGroundContact then
+					if not self.soMaIsLowered then
 						playSample(self.SeSoSoundId2, 0, 1, 0);
 						-- print("playSample(self.raised, 0, 1, 0);")
 						self.sowingSounds.isRaised = true;
 					end;
 				else
-					if self.soMaHasGroundContact then
+					if self.soMaIsLowered then
 						self.sowingSounds.isRaised = false;
 						stopSample(self.SeSoSoundId2);
 						-- print("stopSample(self.raised);")
 					end;
 				end;
-				if not self.sowingSounds.isLineActive then					--> falls DrivingLine.lua vorhanden
+				if not self.sowingSounds.isLineActive then					--> falls drivingLine.lua vorhanden
 					if self.drivingLineActiv then
 						playSample(self.SeSoSoundId3, 0, 1, 0);
-						-- print("playSample(self.line, 0, 1, 0);")
+						--print("playSample(self.line, 0, 1, 0);")
 						self.sowingSounds.isLineActive = true;
 					end;
 				else
 					if not self.drivingLineActiv then
 						self.sowingSounds.isLineActive = false;
 						stopSample(self.SeSoSoundId3);
-						-- print("stopSample(self.line);")
+						--print("stopSample(self.line);")
 					end;
 				end;
 
@@ -248,6 +243,7 @@ function SowingSounds:updateSoSoGUI()
 			self.hud1.grids.main.elements.sowingSound.isVisible = true;
 		else
 			self.hud1.grids.main.elements.sowingSound.isVisible = false;
+			self.hud1.grids.config.elements.soSoModul.value = false;
 		end;
 	end;
 end;

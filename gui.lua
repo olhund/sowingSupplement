@@ -107,7 +107,7 @@ end;
 
 -- Create object "guiElement"
 SowingSupp.guiElement = {};
-function SowingSupp.guiElement:New ( gridPos, functionToCall, parameter1, parameter2, style, label, value, isVisible, graphic, textSize)
+function SowingSupp.guiElement:New ( gridPos, functionToCall, parameter1, parameter2, style, label, value, isVisible, graphic, textSize, textAlignment)
 	local obj = setmetatable ( { }, { __index = self } )
 	obj.gridPos = gridPos;
 	obj.functionToCall = functionToCall;
@@ -118,6 +118,7 @@ function SowingSupp.guiElement:New ( gridPos, functionToCall, parameter1, parame
 	obj.value = value;
 	obj.isVisible = isVisible;
 	obj.textSize = textSize;
+	obj.textAlignment = textAlignment;
 	if style == "info" or style == "separator" then
     if graphic ~= nil then
 		  obj.graphic = createImageOverlay(Utils.getFilename("img/"..graphic..".dds", SowingSupp.path));
@@ -165,12 +166,15 @@ function SowingSupp.buttonSet:New ( functionToCall, style, gridPos, graphic )
   local baseHeight = g_currentMission.hudSelectionBackgroundOverlay.height;
   local baseWidth = baseHeight / g_screenAspectRatio;
   if style == "plusminus" or style == "arrow" then -- plus minus & arrow
-    obj.areas.minus.xMin = -0.0145;
-    obj.areas.minus.xMax = -0.0045;
-    obj.areas.minus.yMin = 0.004;
-    obj.areas.minus.yMax = 0.018;
-    obj.areas.plus.xMin = 0.005;
-    obj.areas.plus.xMax = 0.015;
+		local iconHeight = .5 * baseHeight;
+    local iconWidth = iconHeight / g_screenAspectRatio;
+    local yOffsetIcon = baseHeight * 0.15;
+    obj.areas.minus.xMin = -1.5*iconWidth;
+    obj.areas.minus.xMax = -.5*iconWidth;
+    obj.areas.minus.yMin = yOffsetIcon;
+    obj.areas.minus.yMax = yOffsetIcon + iconHeight;
+    obj.areas.plus.xMin = .5*iconWidth;
+    obj.areas.plus.xMax = 1.5*iconWidth;
     obj.areas.plus.yMin = obj.areas.minus.yMin;
     obj.areas.plus.yMax = obj.areas.minus.yMax;
   elseif style == "toggle" then
@@ -229,27 +233,31 @@ function SowingSupp.guiElement:render(grid, container)
 
     if self.style == "plusminus" or self.style == "arrow" then
       setTextAlignment(RenderText.ALIGN_CENTER);
-      renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 0.045), 0.01, tostring(self.label));
-      renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 0.026), 0.018, tostring(self.value));
+			local yOffsetText = baseHeight/2;
+      local iconHeight = .5 * baseHeight;
+      local iconWidth = iconHeight / g_screenAspectRatio;
+      local yOffsetIcon = baseHeight * 0.15;
+      renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 3*yOffsetText), g_currentMission.timeScaleTextSize, tostring(self.label));
+      renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 2*yOffsetText), g_currentMission.fillLevelTextSize, tostring(self.value));
       if not self.buttonSet.button1IsActive then
         setOverlayColor(self.buttonSet.overlays.overlayMinus, 1, 1, 1, 0.1);
       else
         setOverlayColor(self.buttonSet.overlays.overlayMinus, 1, 1, 1, 1);
       end;
-      renderOverlay(self.buttonSet.overlays.overlayMinus, grid.table[self.gridPos].x + grid.centerX - 0.015, grid.table[self.gridPos].y + 0.005, 0.01, 0.015);
+      renderOverlay(self.buttonSet.overlays.overlayMinus, grid.table[self.gridPos].x + grid.centerX - 1.5*iconWidth, grid.table[self.gridPos].y +yOffsetIcon, iconWidth, iconHeight);
       if not self.buttonSet.button2IsActive then
         setOverlayColor(self.buttonSet.overlays.overlayPlus, 1, 1, 1, 0.1);
       else
         setOverlayColor(self.buttonSet.overlays.overlayPlus, 1, 1, 1, 1);
       end;
-      renderOverlay(self.buttonSet.overlays.overlayPlus, grid.table[self.gridPos].x + grid.centerX + 0.005, grid.table[self.gridPos].y + 0.005, 0.01, 0.015);
+      renderOverlay(self.buttonSet.overlays.overlayPlus, grid.table[self.gridPos].x + grid.centerX + .5*iconWidth, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight);
 
     elseif self.style == "toggle" then
       setTextAlignment(RenderText.ALIGN_CENTER);
       local iconHeight = 1.2 * baseHeight;
       local iconWidth = iconHeight / g_screenAspectRatio;
       local yOffsetIcon = baseHeight * 0.15;
-      local yOffsetText = yOffsetIcon + 1.1 * iconHeight;
+      local yOffsetText = 1.5*baseHeight;--yOffsetIcon + 1.1 * iconHeight;
       renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.label));
       if self.value then
         renderOverlay(self.buttonSet.overlays.overlayToggleOn, grid.table[self.gridPos].x + grid.centerX - iconWidth/2, grid.table[self.gridPos].y + yOffsetIcon, iconWidth, iconHeight);
@@ -272,15 +280,26 @@ function SowingSupp.guiElement:render(grid, container)
       renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.label));
 
     elseif self.style == "info" then
-      setTextAlignment(RenderText.ALIGN_LEFT);
-      local iconHeight = .8 * baseHeight;
-      local iconWidth = iconHeight / g_screenAspectRatio;
-      local offsetIcon = baseHeight * 0.05;
-      renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
-      local xOffsetText =  iconWidth + 3 * offsetIcon;--baseHeight * .84;
-      local yOffsetText = baseHeight * .28;--yOffsetText fillLevelTextSize
+      setTextAlignment(self.textAlignment);
+			local iconHeight = .8 * baseHeight;
+			local iconWidth = iconHeight / g_screenAspectRatio;
+			local offsetIcon = baseHeight * 0.05;	
+			local xOffsetText =  grid.centerX;
+			local yOffsetText = baseHeight * .28;--yOffsetText fillLevelTextSize
+			if self.graphic ~= nil then
+				renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetIcon, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
+				xOffsetText =  iconWidth + 3 * offsetIcon;
+			end;	
+			-- local xOffsetText =  iconWidth + 3 * offsetIcon;
+			-- local yOffsetText = baseHeight * .28;--yOffsetText fillLevelTextSize
       renderText((grid.table[self.gridPos].x + xOffsetText), (grid.table[self.gridPos].y + yOffsetText), self.textSize, tostring(self.value));
 
+    elseif self.style == "info_ww_numDriLi" then
+      setTextAlignment(RenderText.ALIGN_CENTER);
+			local yOffsetText = baseHeight/2;
+      renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 1*yOffsetText), g_currentMission.timeScaleTextSize, tostring(self.label));
+      renderText((grid.table[self.gridPos].x + grid.centerX), (grid.table[self.gridPos].y + 0*yOffsetText), g_currentMission.fillLevelTextSize, tostring(self.value));
+			
     elseif self.style == "separator" then
       local offsetSep = baseHeight * 0.1;
       --renderOverlay(self.graphic, grid.table[self.gridPos].x + offsetSep, grid.table[self.gridPos].y, sepWidth - offsetSep, 0.01);
@@ -309,6 +328,7 @@ function SowingSupp.guiElement:render(grid, container)
       end;
       renderOverlay(self.buttonSet.overlays.overlayClose, grid.table[self.gridPos].x + grid.rightX - offsetIcon - iconWidth, grid.table[self.gridPos].y + offsetIcon, iconWidth, iconHeight);
     end;
+		setTextAlignment(RenderText.ALIGN_LEFT);
   end;
 end;
 

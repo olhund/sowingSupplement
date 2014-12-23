@@ -13,22 +13,39 @@
  	</description>
     <multiplayer supported="true"/>
 	<iconFilename>store.png</iconFilename>
-	<version>0.07</version>
+	<version>0.09</version>
 	<extraSourceFiles>
         <sourceFile filename="register.lua" />
     </extraSourceFiles>
 	<inputBindings>
 		<input name="SOWINGSUPP_HUD"       			category="VEHICLE" key1="KEY_lctrl KEY_4"   			key2="" button="" device="0" mouse="" visible="true" />
 		<input name="SOWINGSUPP_MOUSE"       		category="VEHICLE" key1="KEY_lctrl"   					key2="" button="" device="0" mouse="" visible="true" />
+		<input name="DRIVINGLINE"  					category="VEHICLE" key1="KEY_4" 						key2="" button="" device="0" mouse="" visible="true" />	
     </inputBindings>
 	<l10n>
 		<!-- Buttons -->
-		<text name="SOWINGSUPP_HUD">            <de>SowingSupp HUD aktivieren</de>      <en>SowingSupp HUD activate</en>		</text>
-		<text name="SOWINGSUPP_MOUSE">          <de>SowingSupp MOUSE aktivieren</de>    <en>SowingSupp MOUSE activate</en>		</text>
+		<text name="SOWINGSUPP_HUD">            <en>SowingSupp HUD activate</en>		<de>SowingSupp HUD aktivieren</de>      </text>
+		<text name="SOWINGSUPP_MOUSE">          <en>SowingSupp MOUSE activate</en>		<de>SowingSupp MOUSE aktivieren</de>    </text>
 		<!-- Text -->
-		<text name="SOWINGSUPP_HUDon">          <de>HUD einschalten</de>             	<en>activate HUD</en>			        </text>
-		<text name="SOWINGSUPP_HUDoff">         <de>HUD ausschalten</de>             	<en>deactivate HUD</en>			        </text>
-		<text name="SowingCounter">             <de>Hektarzähler</de>            		<en>hectare counter</en>			    </text>
-		<text name="SowingSounds">              <de>Akustische Signale</de>            	<en>acoustic signals</en>			    </text>
+		<text name="SOWINGSUPP_CONFIGLABEL">    <en>Preferences</en>			        <de>Einstellungen</de>             		</text>
+		<text name="SOWINGSUPP_HUDon">          <en>activate HUD</en>			        <de>HUD einschalten</de>             	</text>
+		<text name="SOWINGSUPP_HUDoff">         <en>deactivate HUD</en>			        <de>HUD ausschalten</de>             	</text>
+		<text name="SOWINGCOUNTER">             <en>hectare counter</en>			    <de>Hektarzähler</de>            		</text>
+		<text name="SOWINGSOUNDS">              <en>acoustic signals</en>			    <de>Akustische Signale</de>            	</text>
+		<text name="SOWINGSOUNDS_SIGNAL">       <en>Signals</en>			    		<de>Signale</de>            			</text>
+		<text name="DRIVINGLINE">              	<en>driving line control</en>			<de>Fahrgassen-Schaltung</de>           </text>
+		<text name="DRIVINGLINE_OFF">           <en>switch off driving line</en>        <de>Fahrgasse ausschalten</de>        	</text>
+		<text name="DRIVINGLINE_ON">            <en>switch on driving line</en>         <de>Fahrgasse einschalten</de>         	</text>
+		<text name="DRIVINGLINE_SHIFT">         <en>upshift track counter</en>          <de>Spurzähler hochschalten</de>        </text>
+		<text name="DRIVINGLINE_PAUSE">         <en>pause track counter</en>            <de>Spurzähler pausieren</de>         	</text>
+		<text name="DRIVINGLINE_ENABLE">        <en>enable track counter</en>           <de>Spurzähler aktivieren</de>         	</text>
+		<text name="DRIVINGLINE_MANUAL">        <en>manual</en>           				<de>manuell</de>         				</text>
+		<text name="DRIVINGLINE_SEMIAUTO">      <en>semiautom.</en>           			<de>halbautom.</de>         			</text>
+		<text name="DRIVINGLINE_AUTO">       	<en>automatic</en>           			<de>automat.</de>         				</text>
+		<text name="DRIVINGLINE_MODE">      	<en>Mode</en>           				<de>Modus</de>         					</text>
+		<text name="DRIVINGLINE_SPWORKWIDTH">   <en>Distance</en>           			<de>Abstand</de>         				</text>
+		<text name="DRIVINGLINE_CURRENTLANE">   <en>Track nr.</en>           			<de>Fahrt Nr.</de>         				</text>
+		<text name="DRIVINGLINE_WORKWIDTH">     <en>Work width:</en>           			<de>Arbeitsbreite:</de>         		</text>
+		<text name="DRIVINGLINE_NUMDRILINE">    <en>Tramline in: </en>           		<de>Fahrgasse in: </de>         		</text>
 	</l10n>
 </modDesc>

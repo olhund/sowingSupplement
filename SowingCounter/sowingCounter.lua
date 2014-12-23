@@ -4,8 +4,8 @@
 --
 -- source: 		threshing counter v2.3 by Manuel Leithner (edit by gotchTOM)
 -- @author:  	Manuel Leithner/gotchTOM
--- @date:			6-Dec-2014
--- @version:	v1.02
+-- @date:			21-Dec-2014
+-- @version:	v1.03
 -- @history:	v1.0 - initial implementation
 --						v1.01 - part of SowingSupplement
 --
@@ -67,9 +67,8 @@ function SowingCounter:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
 		self.activeModules.sowingCounter = Utils.getNoNil(getXMLBool(xmlFile, key .. "#sowingCounterIsActiv"), self.activeModules.sowingCounter);
 		self.sowingCounter.totalHectars =  Utils.getNoNil(getXMLFloat(xmlFile, key .. "#totalHectars"), 0);
 		self:updateSoCoGUI();
-		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_sowingCounterIsActiv = "..tostring(self.activeModules.sowingCounter))
-		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_totalHectars = "..tostring(self.sowingCounter.totalHectars))
-		-- print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes -> self:updateSoCoGUI()")
+		--print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_sowingCounterIsActiv = "..tostring(self.activeModules.sowingCounter))
+		--print("!!!!!!!!!!!!!!SowingCounter:loadFromAttributesAndNodes_totalHectars = "..tostring(self.sowingCounter.totalHectars))
 	end;
     return BaseMission.VEHICLE_LOAD_OK;
 end;
@@ -77,7 +76,7 @@ end;
 function SowingCounter:getSaveAttributesAndNodes(nodeIdent)
 	local attributes = 'sowingCounterIsActiv="' .. tostring(self.activeModules.sowingCounter) ..'"';
 	attributes = attributes.. ' totalHectars="' .. tostring(self.sowingCounter.totalHectars) ..'"';
-	-- print("!!!!!!!!!!!!!!SowingCounter:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
+	--print("!!!!!!!!!!!!!!SowingCounter:getSaveAttributesAndNodes_attributes = "..tostring(attributes))
 	return attributes;
 end;
 
@@ -95,11 +94,14 @@ function SowingCounter:readStream(streamId, connection)
 	-- print("!!!!!!!!!!SowingCounter:readStream")
 		local session = streamReadFloat32(streamId);
 		local total = streamReadFloat32(streamId);
+		local hectarTimer = streamReadFloat32(streamId);
 		if self.sowingCounter ~= nil then
 			self.sowingCounter.sessionHectars = session;
 			self.sowingCounter.totalHectars = total;
 			self.sowingCounter.sessionHectarsSent = self.sowingCounter.sessionHectars;
 			self.sowingCounter.totalHectarsSent = self.sowingCounter.totalHectars;
+			self.sowingCounter.hectarTimer = hectarTimer;
+			self:updateSoCoGUI();
 		end;
 	end;
 end;
@@ -107,23 +109,26 @@ end;
 function SowingCounter:writeStream(streamId, connection)
 	streamWriteFloat32(streamId, self.sowingCounter.sessionHectars);
 	streamWriteFloat32(streamId, self.sowingCounter.totalHectars);
+	streamWriteFloat32(streamId, self.sowingCounter.hectarTimer);
 end;
 
 function SowingCounter:readUpdateStream(streamId, timestamp, connection)
     if connection:getIsServer() then
-        if streamReadBool(streamId) then
-			self.sowingCounter.sessionHectars = streamReadFloat32(streamId);
-			self.sowingCounter.totalHectars = streamReadFloat32(streamId);
-        end;
+      if streamReadBool(streamId) then
+				self.sowingCounter.sessionHectars = streamReadFloat32(streamId);
+				self.sowingCounter.totalHectars = streamReadFloat32(streamId);
+				self.sowingCounter.hectarTimer = streamReadFloat32(streamId);
+      end;
     end;
 end;
 
 function SowingCounter:writeUpdateStream(streamId, connection, dirtyMask)
     if not connection:getIsServer() then
-        if streamWriteBool(streamId, bitAND(dirtyMask, self.sowingCounter.sowingCounterDirtyFlag) ~= 0) then
-			streamWriteFloat32(streamId, self.sowingCounter.sessionHectarsSent);
-			streamWriteFloat32(streamId, self.sowingCounter.totalHectarsSent);
-        end;
+      if streamWriteBool(streamId, bitAND(dirtyMask, self.sowingCounter.sowingCounterDirtyFlag) ~= 0) then
+				streamWriteFloat32(streamId, self.sowingCounter.sessionHectarsSent);
+				streamWriteFloat32(streamId, self.sowingCounter.totalHectarsSent);
+				streamWriteFloat32(streamId, self.sowingCounter.hectarTimer);
+      end;
     end;
 end;
 
@@ -246,6 +251,7 @@ function SowingCounter:updateSoCoGUI()
 		else
 			self.hud1.grids.main.elements.scSession.isVisible = false;
 			self.hud1.grids.main.elements.scTotal.isVisible = false;
+			self.hud1.grids.config.elements.soCoModul.value = false;
 		end;
 	end;
 end;

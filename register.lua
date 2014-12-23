@@ -1,6 +1,7 @@
 SpecializationUtil.registerSpecialization("sowingSupp", "SowingSupp", g_currentModDirectory.."sowingSupp.lua")
 SpecializationUtil.registerSpecialization("sowingCounter", "SowingCounter", g_currentModDirectory.."SowingCounter/sowingCounter.lua")
 SpecializationUtil.registerSpecialization("sowingSounds", "SowingSounds", g_currentModDirectory.."SowingSounds/sowingSounds.lua")
+SpecializationUtil.registerSpecialization("drivingLine", "DrivingLine", g_currentModDirectory.."DrivingLine/drivingLine.lua")
 
 SowingSupp_Register = {};
 local modItem = ModsUtil.findModItemByModName(g_currentModName);
@@ -37,12 +38,29 @@ function SowingSupp_Register:loadMap(name)
 						if allowInsertion then
 							-- print("adding SowingSupp to:"..tostring(v.name));
 							table.insert(v.specializations, SpecializationUtil.getSpecialization("sowingSupp"));
+							vs.SOWINGSUPP_CONFIGLABEL = g_i18n:getText("SOWINGSUPP_CONFIGLABEL");
 							vs.SOWINGSUPP_HUDon = g_i18n:getText("SOWINGSUPP_HUDon");
 							vs.SOWINGSUPP_HUDoff = g_i18n:getText("SOWINGSUPP_HUDoff");
-							vs.SowingCounter = g_i18n:getText("SowingCounter");
-							vs.SowingSounds = g_i18n:getText("SowingSounds");
+							vs.SOWINGCOUNTER = g_i18n:getText("SOWINGCOUNTER");
+							vs.SOWINGSOUNDS = g_i18n:getText("SOWINGSOUNDS");
+							vs.SOWINGSOUNDS_SIGNAL = g_i18n:getText("SOWINGSOUNDS_SIGNAL");
+							vs.DRIVINGLINE = g_i18n:getText("DRIVINGLINE");
+							vs.DRIVINGLINE_OFF = g_i18n:getText("DRIVINGLINE_OFF");
+							vs.DRIVINGLINE_ON = g_i18n:getText("DRIVINGLINE_ON");
+							vs.DRIVINGLINE_SHIFT = g_i18n:getText("DRIVINGLINE_SHIFT");
+							vs.DRIVINGLINE_PAUSE = g_i18n:getText("DRIVINGLINE_PAUSE");
+							vs.DRIVINGLINE_ENABLE = g_i18n:getText("DRIVINGLINE_ENABLE");
+							vs.DRIVINGLINE_MANUAL = g_i18n:getText("DRIVINGLINE_MANUAL");
+							vs.DRIVINGLINE_SEMIAUTO = g_i18n:getText("DRIVINGLINE_SEMIAUTO");
+							vs.DRIVINGLINE_AUTO = g_i18n:getText("DRIVINGLINE_AUTO");
+							vs.DRIVINGLINE_MODE = g_i18n:getText("DRIVINGLINE_MODE");
+							vs.DRIVINGLINE_SPWORKWIDTH = g_i18n:getText("DRIVINGLINE_SPWORKWIDTH");
+							vs.DRIVINGLINE_CURRENTLANE = g_i18n:getText("DRIVINGLINE_CURRENTLANE");
+							vs.DRIVINGLINE_WORKWIDTH = g_i18n:getText("DRIVINGLINE_WORKWIDTH");
+							vs.DRIVINGLINE_NUMDRILINE = g_i18n:getText("DRIVINGLINE_NUMDRILINE");
 							table.insert(v.specializations, SpecializationUtil.getSpecialization("sowingCounter"));
 							table.insert(v.specializations, SpecializationUtil.getSpecialization("sowingSounds"));
+							table.insert(v.specializations, SpecializationUtil.getSpecialization("drivingLine"));
 						end;
 					end;
 				end;
