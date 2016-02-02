@@ -3,21 +3,23 @@
 -- Specialization for driving lines of sowing machines
 --
 --	@author:		gotchTOM & webalizer
---	@date: 			22-Dec-2014
---	@version: 	v1.5.8a
+--	@date: 			26-Nov-2015
+--	@version: 	v1.5.93
 --	@history:		v1.0 	- initial implementation (17-Jun-2012)
 --							v1.5  - SowingSupplement implementation
 
 
 DrivingLine = {};
 
--- local modD = g_currentModDirectory;
--- source(modD.."DrivingLine/drivingLine_Events.lua");
 source(g_modsDirectory.."/ZZZ_sowingSupp/DrivingLine/drivingLine_Events.lua");
 
 function DrivingLine.prerequisitesPresent(specializations)
     return SpecializationUtil.hasSpecialization(SowingMachine, specializations);
 end;
+
+function DrivingLine:preLoad(xmlFile)
+    self.loadSpeedRotatingPartFromXML = Utils.overwrittenFunction(self.loadSpeedRotatingPartFromXML, DrivingLine.loadSpeedRotatingPartFromXML);
+end
 
 function DrivingLine:load(xmlFile)
 
@@ -25,31 +27,56 @@ function DrivingLine:load(xmlFile)
 	self.setSPworkwidth = SpecializationUtil.callSpecializationsFunction("setSPworkwidth");
 	self.setPeMarker = SpecializationUtil.callSpecializationsFunction("setPeMarker");
 	self.updateDriLiGUI = SpecializationUtil.callSpecializationsFunction("updateDriLiGUI");
+	self.workAreaMinMaxHeight = SpecializationUtil.callSpecializationsFunction("self.workAreaMinMaxHeight");
+	self.workAreaMinMaxHeight = DrivingLine.workAreaMinMaxHeight;
 
 	local numDrivingLines = Utils.getNoNil(getXMLInt(xmlFile, "vehicle.drivingLines#count"),0);
-	-- print("numDrivingLines = "..tostring(numDrivingLines))--!!!
+	print("DrivingLine load: numDrivingLines = "..tostring(numDrivingLines))--!!!
 	local numPeMarkerLines = Utils.getNoNil(getXMLInt(xmlFile, "vehicle.peMarkerLines#count"),0);
-	-- print("numPeMarkerLines = "..tostring(numPeMarkerLines))--!!!
+	print("DrivingLine load: numPeMarkerLines = "..tostring(numPeMarkerLines))--!!!
+	
 	if numDrivingLines == 0 or numPeMarkerLines == 0 then
+	
+    self.getIsSpeedRotatingPartActive = Utils.overwrittenFunction(self.getIsSpeedRotatingPartActive, DrivingLine.getIsSpeedRotatingPartActive);
+    
 		local componentNr = string.sub(getXMLString(xmlFile, "vehicle.aiLeftMarker#index"),1,1) +1;
 		self.dlRootNode = self.components[componentNr].node;
-		local workAreas = self.workAreaByType[2];
-		DrivingLine:workAreaMinMaxHeight(self,workAreas);
-		-- print("xMin: "..tostring(self.xMin).."  xMax: "..tostring(self.xMax).."  yStart: "..tostring(self.yStart).."  zHeight: "..tostring(self.zHeight))
-		local workWidth = math.abs(self.xMax-self.xMin);
-		self.smWorkwith = math.floor(workWidth + 0.5);
-		-- print("self.smWorkwith: "..tostring(self.smWorkwith))
-		if workWidth > .1 then
-			self.wwCenter = (self.xMin+self.xMax)/2;
-			if math.abs(self.wwCenter) < 0.1 then
-				self.wwCenter = 0;
+		local workAreas;
+		for _,workArea in pairs(self.workAreaByType) do
+			for _,a in pairs(workArea) do
+				local areaTypeStr = WorkArea.areaTypeIntToName[a.type];
+				if areaTypeStr == "sowingMachine" then
+					workAreas = self.workAreaByType[a.type];
+					print("DrivingLine load: workarea.type = "..tostring(a.type).."  /  areaTypeStr = "..tostring(areaTypeStr))
+				end;
 			end;
 		end;
-		self.wwCenterPoint = createTransformGroup("wwCenterPoint");
-		link(self.dlRootNode, self.wwCenterPoint);
-		setTranslation(self.wwCenterPoint,self.wwCenter,self.yStart,self.zHeight-.2);
+		-- local workAreas = self:getTypedWorkAreas(WorkArea.AREATYPE_SOWINGMASHINE);
+		-- print("workAreas = "..tostring(workAreas))
+		if workAreas ~= nil then
+			self:workAreaMinMaxHeight(workAreas);
+			print("DrivingLine load: xMin = "..tostring(self.xMin).."  xMax = "..tostring(self.xMax).."  yStart = "..tostring(self.yStart).."  zHeight = "..tostring(self.zHeight))
+			local workWidth = math.abs(self.xMax-self.xMin);
+			self.smWorkwith = math.floor(workWidth + 0.5);
+			print("DrivingLine load: smWorkwith = "..tostring(self.smWorkwith))
+			if workWidth > .1 then
+				self.wwCenter = (self.xMin+self.xMax)/2;
+				if math.abs(self.wwCenter) < 0.1 then
+					self.wwCenter = 0;
+				end;
+			end;
+			self.wwCenterPoint = createTransformGroup("wwCenterPoint");
+			link(self.dlRootNode, self.wwCenterPoint);
+			setTranslation(self.wwCenterPoint,self.wwCenter,self.yStart,self.zHeight-.2);
+		else
+			self.drivingLinePresent = false;
+			self.activeModules.drivingLine = false;
+			self:updateDriLiGUI();
+			print(tostring(self.typeName).." has no workarea of type sowingMachine -> DrivingLine can not be used!")
+			return
+		end;	
 	end;
-
+	
 	if numDrivingLines > 0 then
 		self.drivingLines = {}
 		for i=1, numDrivingLines do
@@ -92,32 +119,36 @@ function DrivingLine:load(xmlFile)
 		self.allowPeMarker = true;
 	end;
 
-	if self.drivingLinePresent then
-		self.drivingLineActiv = false;
-		self.IsLoweredBackUp = false;
-		-- self.dlAllowUpdate = true;
-		self.isPaused = false;
-		self.dlCheckOnLeave = false;
-		self.hasChanged = false;
+	self.drivingLineActiv = false;
+	self.IsLoweredBackUp = false;
+	self.isPaused = false;
+	self.dlCheckOnLeave = false;
+	self.hasChanged = false;
 
-		self.dlMode = 0; -- 0 = manual, 1 = semiAutomatic, 2 = automatic
-		self.currentLane = 1; --currentDrive
-		-- self.smWorkwith = 3;
-		self.nSMdrives = 3;
-		if (self.nSMdrives%2 == 0) then -- gerade Zahl
-			self.num_DrivingLine = (self.nSMdrives / 2) + 1;
-		elseif (self.nSMdrives%2 ~= 0) then -- ungerade Zahl
-			self.num_DrivingLine = (self.nSMdrives + 1) / 2;
-		end;
-		-- self.dlWarning = 0;
-		self.dlCultivatorDelay = 0;
+	self.dlMode = 0; -- 0 = manual, 1 = semiAutomatic, 2 = automatic
+	self.currentLane = 1; --currentDrive
+	self.nSMdrives = 3;
+	if (self.nSMdrives%2 == 0) then -- gerade Zahl
+		self.num_DrivingLine = (self.nSMdrives / 2) + 1;
+	elseif (self.nSMdrives%2 ~= 0) then -- ungerade Zahl
+		self.num_DrivingLine = (self.nSMdrives + 1) / 2;
 	end;
-
-	--test
-	-- self.dlLastFillLevel = 0;--self.fillLevel;
-	-- self.dlLastTime = 0;--g_currentMission.time;
-	-- self.diff = 0;
-	-- self.testFaktor = .07;
+	self.dlCultivatorDelay = 0;
+	
+	self.laneMarkers = {};
+	local i = 0;
+	while true do
+			local key = string.format("vehicle.laneMarkers.laneMarker(%d)", i);
+			if not hasXMLProperty(xmlFile, key) or self.animations == nil then
+					break;
+			end;
+			local laneMarker = {};
+			laneMarker.animName = getXMLString(xmlFile, key .. "#animName");
+				-- print("load!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!self.animations[laneMarker.animName]"..tostring(self.animations[laneMarker.animName])) 	
+			table.insert(self.laneMarkers, laneMarker);
+			i = i + 1;
+	end;
+	
 end;
 
 function DrivingLine:delete()
@@ -191,7 +222,7 @@ function DrivingLine:keyEvent(unicode, sym, modifier, isDown)
 end;
 
 function DrivingLine:update(dt)
-
+	
 	if self:getIsActiveForInput() then
 		if self.drivingLinePresent and self.activeModules ~= nil and self.activeModules.drivingLine then
 			-- switch driving line / current drive / pause manually
@@ -199,17 +230,10 @@ function DrivingLine:update(dt)
 				if self.dlMode == 0 then
 					if self.drivingLineActiv then
 						self:setDrivingLine(false, self.dlMode, self.currentLane, self.isPaused, self.nSMdrives, self.smWorkwith, self.allowPeMarker);
-						-- print("InputBinding.hasEvent(InputBinding.DRIVINGLINE) self:setDrivingLine(false);")
-						-- if self.allowPeMarker and self.peMarkerActiv then
-							-- self:setPeMarker(false);
-						-- end;
 					else
 						self:setDrivingLine(true, self.dlMode, self.currentLane, self.isPaused, self.nSMdrives, self.smWorkwith, self.allowPeMarker);
 						-- print("InputBinding.hasEvent(InputBinding.DRIVINGLINE) self:setDrivingLine(true);")
 						self.dlCultivatorDelay = g_currentMission.time + 1000;
-						-- if not self.peMarkerActiv then
-							-- self:setPeMarker(true);
-						-- end;
 					end;
 				elseif self.dlMode == 1 then
 					if self.currentLane < self.nSMdrives then
@@ -219,7 +243,6 @@ function DrivingLine:update(dt)
 					end;
 				elseif self.dlMode == 2 then
 					self.isPaused = not self.isPaused;
-					-- self.hasChanged = true;
 				end;
 				self:updateDriLiGUI();
 			end;
@@ -256,16 +279,6 @@ function DrivingLine:updateTick(dt)
 			if self.isServer then
 				if self.drivingLineActiv then
 					local allowDrivingLine = self.soMaIsLowered;
-					--[[local allowDrivingLine = false;
-					if self.needsActivation then
-						if self.soMaIsLowered and self.isTurnedOn then
-							allowDrivingLine = true;
-						end;
-					else
-						if self.soMaIsLowered then
-							allowDrivingLine = true;
-						end;
-					end;]]
 					if allowDrivingLine and self.dlCultivatorDelay <= g_currentMission.time then
 						local drivingLinesSend = {};
 						for i=1, 2 do
@@ -679,7 +692,50 @@ function DrivingLine:updateTick(dt)
 				end;
 				self.IsLoweredBackUp = self.soMaIsLowered;
 			end;
+			
+			if table.getn(self.laneMarkers) > 0 then
+				for k,v in pairs(self.laneMarkers) do
+					local name = v.animName;
+					if self.soMaIsLowered then
+						if self.peMarkerActiv and self.drivingLineActiv then
+							if name ~= nil then
+								-- renderText(0.1,0.1,0.02,"self.animations[name].currentTime = "..tostring(self.animations[name].currentTime))
+								-- renderText(0.1,0.12,0.02,"self.animations[name].duration = "..tostring(self.animations[name].duration))
+								if self.animations[name].currentTime ~= self.animations[name].duration then
+									local animTime = self:getAnimationTime(name);
+									-- renderText(0.1,0.14,0.02,"animTime"..tostring(animTime))
+									self:playAnimation(name, 1, animTime, true);
+									-- renderText(0.1,0.08,0.02,"playAnimation")
+								end;	
+							end;
+						else
+							-- renderText(0.1,0.1,0.02,"self.animations[name].currentTime = "..tostring(self.animations[name].currentTime))
+							-- renderText(0.1,0.12,0.02,"self.animations[name].duration = "..tostring(self.animations[name].duration))
+							local startTime = Utils.getNoNil(self.animations[name].startTime,0);
+							if self.animations[name].currentTime ~= startTime then 
+								local animTime = self:getAnimationTime(name);
+								-- renderText(0.1,0.14,0.02,"animTime"..tostring(animTime))
+								self:playAnimation(name, -1, animTime, true);
+								-- renderText(0.1,0.08,0.02,"playAnimation")
+							end;	
+						end;
+					else
+						if name ~= nil then --self.laneMarkers[1].animName ~= nil then
+							-- renderText(0.1,0.1,0.02,"self.animations[name].currentTime = "..tostring(self.animations[name].currentTime))
+							-- renderText(0.1,0.12,0.02,"self.animations[name].duration = "..tostring(self.animations[name].duration))
+							local startTime = Utils.getNoNil(self.animations[name].startTime,0);
+							if self.animations[name].currentTime ~= startTime then 
+								local animTime = self:getAnimationTime(name);
+								-- renderText(0.1,0.14,0.02,"animTime"..tostring(animTime))
+								self:playAnimation(name, -1, animTime, true);
+								-- renderText(0.1,0.08,0.02,"playAnimation")
+							end;	
+						end;
+					end;
+				end;	
+			end;
 		end;
+		
 		if self:getIsActiveForInput() then
 			if not self.dlCheckOnLeave then
 				self.dlCheckOnLeave = true;
@@ -783,14 +839,14 @@ end;
 function DrivingLine:setSPworkwidth(raise, noEventSend)
 -- print("DrivingLine:setSPworkwidth(raise, noEventSend)")
 	if not raise then
-		if self.nSMdrives > 3 and self.spWorkwith < 61 then
+		if self.nSMdrives > 3 and self.spWorkwith < 67 then
 			self.nSMdrives = self.nSMdrives - 1;
 			if self.currentLane > self.nSMdrives then
 				self.currentLane = self.nSMdrives;
 			end;
 		end;
 	else
-		if self.spWorkwith < 57 then
+		if self.spWorkwith <= 57 then
 			self.nSMdrives = self.nSMdrives + 1;
 		end;
 	end;
@@ -810,7 +866,7 @@ function DrivingLine:setPeMarker(peMarkerActiv, noEventSend)
 	self.peMarkerActiv = peMarkerActiv;
 end;
 
-function DrivingLine:workAreaMinMaxHeight(self,areas)
+function DrivingLine:workAreaMinMaxHeight(areas)
 	self.xMin = 0;
 	self.xMax = 0;
 	self.yStart = 0;
@@ -824,6 +880,11 @@ function DrivingLine:workAreaMinMaxHeight(self,areas)
 			local lx2,ly2,lz2 = worldToLocal(self.dlRootNode,x2,y2,z2);
 			local lx3,ly3,lz3 = worldToLocal(self.dlRootNode,x3,y3,z3);
 
+-- print("lx1"..tostring(lx1))
+-- print("lx2"..tostring(lx2))
+-- print("lx3"..tostring(lx3))
+-- print("ly1"..tostring(ly1))
+-- print("lz3"..tostring(lz3))
 			if lx1 < self.xMin then
 				self.xMin = lx1;
 			end
@@ -846,10 +907,14 @@ function DrivingLine:workAreaMinMaxHeight(self,areas)
 			self.zHeight = lz3;
 		end
 	end
+	-- return self.xMin, self.xMax, self.yStart, self.zHeight;
 end;
 
 function DrivingLine:createDrivingLines()
 	local drivingLines = {};
+	
+	print("DrivingLine:createDrivingLines -> self.wwCenter: "..tostring(self.wwCenter))
+	print("DrivingLine:createDrivingLines -> self.drivingLineWidth: "..tostring(self.drivingLineWidth))
 	local x = self.wwCenter + self.drivingLineWidth;
 	local y = self.yStart;
 	local z = self.zHeight - .2;
@@ -986,4 +1051,25 @@ function DrivingLine:updateDriLiGUI()
 			self.hud1.grids.config.elements.driLiModul.value = false;
 		end;
 	end;
+end;
+
+function DrivingLine:loadSpeedRotatingPartFromXML(superFunc, speedRotatingPart, xmlFile, key)--(speedRotatingPart, xmlFile, key)
+    if superFunc ~= nil then
+        if not superFunc(self, speedRotatingPart, xmlFile, key) then
+            return false;
+        end
+    end
+    speedRotatingPart.laneMarkerAnim = getXMLString(xmlFile, key .. "#laneMarkerAnim");
+    speedRotatingPart.laneMarkerAnimTimeMax = Utils.getNoNil(getXMLFloat(xmlFile, key .. "#laneMarkerAnimTimeMax"), 0.99);
+    return true;
+end;
+
+function DrivingLine:getIsSpeedRotatingPartActive(superFunc, speedRotatingPart)--(superFunc, speedRotatingPart)
+    if speedRotatingPart.laneMarkerAnim ~= nil and self:getAnimationTime(speedRotatingPart.laneMarkerAnim) < speedRotatingPart.laneMarkerAnimTimeMax then
+        return false;
+    end;
+    if superFunc ~= nil then
+        return superFunc(self, speedRotatingPart);
+    end
+    return true;
 end;

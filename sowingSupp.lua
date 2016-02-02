@@ -3,14 +3,15 @@
 -- a collection of several seeder modifications
 --
 --	@author:		gotchTOM & webalizer
---	@date: 			12-Dec-2014
---	@version: 	v0.07
+--	@date: 			25-Nov-2015
+--	@version: 	v0.08
 --
 -- included modules: sowingCounter, sowingSounds
 --
 -- added modules:
 -- 		sowingCounter:			hectar counter for seeders
 -- 		sowingSounds:				acoustic signals for seeders
+--		drivingLine:
 --
 -- changes in modules:
 --
@@ -231,7 +232,7 @@ function SowingSupp:modules(grid, container, vehicle, guiElement, parameter)
 		vehicle.activeModules.sowingSounds = guiElement.value;
 		vehicle:updateSoSoGUI();
 	end;
-	if guiElement.functionToCall == "toggleDriLiModul" then
+	if guiElement.functionToCall == "toggleDriLiModul" and vehicle.drivingLinePresent then
 		guiElement.value = not guiElement.value;
 		vehicle.activeModules.drivingLine = guiElement.value;
 		vehicle:updateDriLiGUI();
@@ -239,6 +240,9 @@ function SowingSupp:modules(grid, container, vehicle, guiElement, parameter)
 	if guiElement.functionToCall == "togglePeMarker" then
 		guiElement.value = not guiElement.value;
 		vehicle.allowPeMarker = guiElement.value;
+		if not vehicle.allowPeMarker and vehicle.peMarkerActiv then
+			vehicle.peMarkerActiv = vehicle.allowPeMarker;
+		end;
 		-- vehicle:setDrivingLine(vehicle.drivingLineActiv, vehicle.dlMode, vehicle.currentLane, vehicle.isPaused, vehicle.nSMdrives, vehicle.smWorkwith, vehicle.allowPeMarker);
 		-- if vehicle.allowPeMarker then
 			-- if vehicle.drivingLineActiv then
